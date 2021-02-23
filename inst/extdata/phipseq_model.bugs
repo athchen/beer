@@ -1,0 +1,88 @@
+### JAGS model for PhIP-seq antibody detection
+# ----- data -----
+# N             number of samples (including beads-only)
+# B             vector indicating whether the sample is a negative control sample or not
+# n             vector of library sizes
+# P             number of peptides
+# Y             matrix of observed reads
+
+# ----- Prior parameters -----
+# a_0, b_0      vector of peptide-specific prior parameters for the beads_only samples
+# a_c, b_c      prior parameters for the attenuation constants
+# a_pi, b_pi    prior parameters for the probability of enrichment
+# a, b          matrix of prior parameters for probabilities of pulling a read
+#               (Note: if sample j is a beads_only row, then a[, j] = a_0 and b[, j] = b_0)
+# a_phi, b_phi  prior parameters for the fold change for enriched peptides.
+# fc            minimum fold change
+
+# ----- parameters of interest -----
+# c             vector of attenuation constants for each sample
+# pi            vector of enrichment probabilities for each sample
+# Z             matrix of indicators for enrichment
+# theta         matrix of read probabilities
+# phi           matrix of fold-changes for enriched peptides
+# log_lik       matrix of posterior log-likelihoods
+
+# ----- dummy variables -----
+# c_sample      vector of attenuation constants, assuming B[j] = 0 for all j
+# pi_sample     matrix of enrichment probabilities, assuming B[j] = 0 for all j
+# phi_enriched  matrix of enrichment factors, 1 if the peptide is not enriched.
+# mean_ne       matrix of average probability of pulling a read, assuming non-enriched peptide in a sample
+# var_ne        matrix of variance for probability of pulling a read, assuming non-enriched peptide
+# mean_e        matrix of average probability of pulling a read, assuming an enriched peptide
+# var_ne        matrix of variance for probability of pulling a read, assuming an enriched peptide
+# loglik_ij     matrix of log-likelihood contribution for parameters indexed by i and j
+# loglik_j      matrix of log-likelihood contribution for parameters only indexed by j
+
+model {
+  for(j in 1:N){
+    # Distribution of c_j
+    c_sample[j] ~ dbeta(a_c, b_c)
+    c[j] <- B[j]*1 + (1-B[j])*c_sample[j]
+
+    # Distribution of pi's
+    pi_sample[j] ~ dbeta(a_pi, b_pi)
+    pi[j] <- B[j]*0 + (1-B[j])*pi_sample[j]
+
+    for(i in 1:P){
+
+      # Distribution of Z's
+      Z[i,j] ~ dbern(pi[j])
+
+      # Distribution of phis
+      phi_sample[i, j] ~ dgamma(a_phi, b_phi)
+      phi[i, j] <- (B[j] + 1 - Z[i, j])*1 + Z[i, j]*(fc + phi_sample[i, j])
+
+      # Define a's and b's, theta's for Z_ij = 1, B_j = 0
+      mean_e[i, j] <- min(phi[i, j]*c[j]*a_0[i]/(a_0[i] + b_0[i]), 1)
+      var_e[i, j] <- a_0[i]*b_0[i]/((a_0[i] + b_0[i])^2*(a_0[i] + b_0[i] + 1))
+
+      a_e[i, j] <- max((1 - mean_e[i, j])*pow(mean_e[i, j], 2)/var_e[i, j] - mean_e[i, j], 1)
+      b_e[i, j] <- max(a_e[i, j]*(1/mean_e[i, j] - 1), 1)
+
+      # Define a's and b's, theta's for Z_ij = 0, B_i = 0
+      mean_ne[i, j] <- c[j]*a_0[i]/(a_0[i] + b_0[i])
+      var_ne[i, j] <- a_0[i]*b_0[i]/((a_0[i] + b_0[i])^2*(a_0[i] + b_0[i] + 1))
+
+      a_ne[i, j] <- max((1-mean_ne[i, j])*pow(mean_ne[i, j],2)/var_ne[i, j] - mean_ne[i, j], 1)
+      b_ne[i, j] <- max(a_ne[i, j]*(1/mean_ne[i, j] - 1), 1)
+
+      # Define simulated a, b matrix
+      a_sim[i, j] <- Z[i, j]*a_e[i, j] + B[j]*a_0[i] + (1 - Z[i, j] - B[j])*a_ne[i, j]
+      b_sim[i, j] <- Z[i, j]*b_e[i, j] + B[j]*b_0[i] + (1 - Z[i, j] - B[j])*b_ne[i, j]
+
+      # Define theta
+      theta[i,j] ~ dbeta(a_sim[i, j], b_sim[i, j])
+
+      # Distribution of Y's
+      Y[i,j] ~ dbinom(theta[i, j], n[j])
+
+      loglik_ij[i,j] <- logdensity.bin(Y[i,j], theta[i,j], n[j]) + logdensity.beta(theta[i,j], a_sim[i,j], b_sim[i, j]) + logdensity.bern(Z[i,j], pi[j]) + Z[i, j]*logdensity.gamma(phi_sample[i, j], a_phi, b_phi)
+    }
+
+    loglik_j[j] <- (1-B[j])*(logdensity.beta(c[j], a_c, b_c) + logdensity.beta(pi[j], a_pi, b_pi))
+  }
+
+  # Calculate log-likelihood
+  log_lik <- sum(loglik_ij, loglik_j)
+}

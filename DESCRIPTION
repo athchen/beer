@@ -1,15 +1,33 @@
 Package: beer
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Title: Bayesian Enrichment Estimation in R
+Version: 0.99.0
+Authors@R: c(person("Athena", "Chen", email = "achen70@jhu.edu", 
+    role = c("aut", "cre"), comment = c(ORCID = "0000-0001-6900-2264")),
+    person("Rob", "Scharpf", email = "rscharpf@jhu.edu", 
+    role = c("aut")), 
+    person("Ingo", "Ruczinski", email = "ingo@jhu.edu", 
+    role = c("aut")))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Depends: 
+    R (>= 4.0.0),
+    PhIPData, 
+    rjags
+Imports:
+    BiocStyle, 
+    edgeR
 Suggests: 
     testthat (>= 3.0.0),
-    covr
+    covr,
+    knitr,
+    rmarkdown
+biocViews: Software, StatisticalMethod, Bayesian
+BugReports: https://github.com/athchen/beer/issues
+Collate:
 Config/testthat/edition: 3
+VignetteBuilder: knitr
+RoxygenNote: 7.1.1
