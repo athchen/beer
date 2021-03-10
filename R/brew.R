@@ -1,10 +1,19 @@
 #' @include utils.R
 
-.tidyInputsPrior <- function(prior.params){
-    params <- c("method", "a_pi", "b_pi", "a_phi", "b_phi", "a_c", "b_c", "fc")
+.tidyInputsPrior <- function(prior.params, object, beads.args){
+    params <- c("method", "a_0", "b_0", "a_pi", "b_pi",
+                "a_phi", "b_phi", "a_c", "b_c", "fc")
 
     ## Set missing parameters to defaults
-    if(!"method" %in% names(prior.params)) prior.params$method <- "mom"
+    if(!"method" %in% names(prior.params)){ prior.params$method <- "mom"}
+    if(!all(c("a_0", "b_0") %in% names(prior.params))){
+        beads_ab <- do.call(getAB, c(list(object = subsetBeads(object),
+                                          method = prior.params$method),
+                                     beads.args))
+        prior.params$a_0 <- beads_ab[["a_0"]]
+        prior.params$b_0 <- beads_ab[["b_0"]]
+    }
+
     if(!"fc" %in% names(prior.params)) prior.params$fc <- 1
 
     ## Check that all necessary prior params are specified
@@ -136,13 +145,14 @@ brew_one <- function(object, sample, prior.params,
                         na.rm = na.rm, ...)
 }
 
+#' @export
 brew <- function(object,
                  prior.params = list(method = "mom",
                                      a_pi = 2, b_pi = 300,
                                      a_phi = 1.25, b_phi = 0.1,
                                      a_c = 80, b_c = 20,
                                      fc = 1),
-                 beads.args = list(),
+                 beads.args = list(lower = 1),
                  se.params = list(method = "mle"),
                  jags.params = list(n.chains = 1, n.adapt = 1e3, quiet = FALSE,
                                     n.iter = 1e4, thin = 1, na.rm = TRUE,
@@ -157,10 +167,8 @@ brew <- function(object,
     .checkCounts(object)
 
     ## Check and tidy inputs
-    prior.params <- .tidyInputsPrior(prior.params)
-    beads.prior <- do.call(getAB, c(list(object = object,
-                                         method = prior.params$method),
-                                    beads.args))
+    prior.params <- .tidyInputsPrior(prior.params, object, beads.args)
+    beads.prior <- prior.params[c("a_0", "b_0")]
     se.params <- .tidyInputsSE(se.params, beads.prior)
     jags.params <- .tidyInputsJAGS(jags.params)
     assay.names <- .tidyAssayNames(assay.names)
@@ -174,11 +182,16 @@ brew <- function(object,
 
     ## Create temporary directory for output of JAGS models
     tmp_dir <- if(is.null(sample.dir)) {
-        new_dir <- paste0(tempdir(), "/beer_run",
-                          as.numeric(format(Sys.Date(), "%Y%m%d")))
-        dir.create(new_dir)
-        new_dir
-    } else normalizePath(sample.dir)
+        paste0(tempdir(), "/beer_run", as.numeric(format(Sys.Date(), "%Y%m%d")))
+    } else sample.dir
+
+    if(dir.exists(tmp_dir)){
+        delete <- menu(c("Yes", "No"),
+                       title = paste0("Specified directory for samples exists. ",
+                                      "Delete the existing directory?"))
+        if(delete == 1) unlink(tmp_dir, recursive = TRUE)
+    }
+    dir.create(tmp_dir, recursive = TRUE)
 
     ## Run sample at a time
     if(!jags.params$quiet) cli::cli_h1("Running JAGS")
@@ -191,7 +204,7 @@ brew <- function(object,
         one_sample <- object[!se_peps[, sample], c(beads_id, sample)]
 
         ## Calculate new beads-only priors
-        new_beads <- do.call(getAB, c(list(object = one_sample,
+        new_beads <- do.call(getAB, c(list(object = subsetBeads(one_sample),
                                            method = prior.params$method),
                                       beads.args))
         new_prior <- c(list(a_0 = new_beads[, "a_0"],
@@ -206,8 +219,17 @@ brew <- function(object,
         saveRDS(jags_run, paste0(tmp_dir,"/", sample, ".rds"))
     }
 
-    summarizeRun(object, tmp_dir, se_peps,
-                 burn.in = jags.params$burn.in,
-                 post.thin = jags.params$post.thin,
-                 assay.names, quiet = FALSE)
+    ## Summarize output
+    if(!jags.params$quiet) cli::cli_h1("Summarizing results")
+    run_out <- summarizeRun(object, tmp_dir, se_peps,
+                            burn.in = jags.params$burn.in,
+                            post.thin = jags.params$post.thin,
+                            assay.names, quiet = FALSE)
+
+    ## Clean-up if necessary
+    if(is.null(sample.dir)){
+        unlink(sample.dir, recursive = TRUE)
+    }
+
+    run_out
 }

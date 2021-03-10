@@ -1,4 +1,5 @@
-.getCommonDisp <- function(object, threshold.cpm = 1, threshold.prevalence = 2){
+#' @export
+.edgeRBeads <- function(object, threshold.cpm = 0, threshold.prevalence = 0){
     edgeR_beads <- as(PhIPData::subsetBeads(object), "DGEList")
 
     ## For dispersion estimates, keep only peptides with cpm above the
@@ -9,39 +10,45 @@
     ## Estimate common dispersion in the beads-only data
     edgeR_beads <- edgeR_beads[keep_ind, , keep.lib.size = FALSE]
     edgeR_beads <- edgeR::calcNormFactors(edgeR_beads)
-    edgeR_beads <- edgeR::estimateCommonDisp(edgeR_beads)
-    edgeR_beads <- edgeR::estimateTagwiseDisp(edgeR_beads)
+    edgeR_beads <- suppressMessages(edgeR::estimateDisp(edgeR_beads))
 
-    edgeR_beads$common.dispersion
+    edgeR_beads
 }
 
-edgeR_one <- function(object, sample, beads, common.disp){
+#' @export
+edgeR_one <- function(object, sample, beads,
+                      common.disp, tagwise.disp, trended.disp){
     ## Coerce into edgeR object
     ## Set common dispersion to disp estimated from beads-only samples
     data <- as(object[, c(beads, sample)], "DGEList")
-    data <- edgeR::calcNormFactors(data)
     data$common.dispersion <- common.disp
+    data$tagwise.dispersion <- tagwise.disp
+    data$trended.disp <- trended.disp
 
     ## edgeR output
     output <- edgeR::exactTest(data)$table
 
     log10pval <- -log10(output$PValue)
-    ## Truncate large p-values for storage reasons
+    # Truncate large p-values for storage reasons
     log10pval <- ifelse(log10pval > 250.1, 250.1, log10pval)
     ## Multiply by the sign of logfc so that negatively enriched peptides
     ## do not appear as significant
-    log10pval <- sign(2^output$logFC)*log10pval
+    # log10pval <- sign(output$logFC)*log10pval
 
     list(sample = sample,
          logfc = output$logFC,
          log10pval = log10pval)
 }
 
-edgeR <- function(object, threshold.cpm = 1, threshold.prevalence = 2,
+#' @export
+edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                   assay.names = c(logfc = "logfc", prob = "prob")){
 
     ## Derive dispersion estimates from beads-only samples
-    common_disp <- .getCommonDisp(object, threshold.cpm, threshold.prevalence)
+    edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
+    common_disp <- edgeR_beads$common.dispersion
+    tagwise_disp <- edgeR_beads$tagwise.dispersion
+    trended_disp <- edgeR_beads$trended.dispersion
 
     ## Set-up output matrices ----------
     ## Make empty matrix for the cases where fc and prob do not exist
@@ -62,7 +69,8 @@ edgeR <- function(object, threshold.cpm = 1, threshold.prevalence = 2,
     beads_names <- colnames(object[, object$group == getBeadsName()])
 
     for(sample in sample_names){
-        output <- edgeR_one(object, sample, beads_names, common_disp)
+        output <- edgeR_one(object, sample, beads_names,
+                            common_disp, tagwise_disp, trended_disp)
 
         edgeR_fc[, output$sample] <- output$logfc
         edgeR_pval[, output$sample] <- output$log10pval

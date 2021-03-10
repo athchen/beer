@@ -28,6 +28,14 @@ Suggests:
 biocViews: Software, StatisticalMethod, Bayesian
 BugReports: https://github.com/athchen/beer/issues
 Collate:
+    'beadsRR.R'
+    'utils.R'
+    'brew.R'
+    'edgeR.R'
+    'getAB.R'
+    'guessEnriched.R'
+    'guessInits.R'
+    'summarizeRun.R'
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1

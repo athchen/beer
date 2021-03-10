@@ -1,3 +1,4 @@
+#' @export
 .checkCounts <- function(object){
     is_int <- vapply(PhIPData::counts(object), is.integer, logical(1))
     if(!all(is_int)){
@@ -5,7 +6,8 @@
     }
 }
 
-get_phat <- function(object){
+#' @export
+getPropReads <- function(object){
 
     n <- PhIPData::librarySize(object, withDimnames = FALSE)
     n_matrix <- matrix(rep(n, nrow(object)), nrow = nrow(object), byrow = TRUE)

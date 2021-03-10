@@ -1,34 +1,33 @@
-#' @include utils.R
+#' @include edgeR.R utils.R
 
 ### edgeR estimates  ==============================================
-#' @import edgeR
-getAB_edgeR <- function(object, threshold.cpm = 1, threshold.prevalence = 2){
-    dge_obj <- as(object, "DGEList")
+#' @export
+.getAB_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
+                         lower = 1, upper = Inf){
 
-    # filter data to keep only peptides with cpm > 1
-    # in at least 2 beads-only samples
-    keep_ind <- rowSums(edgeR::cpm(dge_obj) > threshold.cpm) >=
-        threshold.prevalence
+    edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
 
-    # calculate common dispersion in beads only data
-    dge_obj <- dge_obj[keep_ind, , keep.lib.size = FALSE]
-    dge_obj <- edgeR::calcNormFactors(dge_obj)
-    dge_obj <- edgeR::estimateCommonDisp(dge_obj)
-    dge_obj <- edgeR::estimateTagwiseDisp(dge_obj)
+    ## Transform edgeR estimates to BB parameters
+    mean_prop <- 2^edgeR_beads$AveLogCPM/1e6
+    var_prop <- edgeR_beads$tagwise.dispersion*mean_prop^2
 
-    # Transform edgeR estimates to BB parameters
-    phat <- 2^dge_obj$AveLogCPM/1e6
-    disp_BB <- ((1 + dge_obj$pseudo.lib.size*phat*dge_obj$tagwise.dispersion)/
-                    (1-phat) - 1)/(dge_obj$pseudo.lib.size - 1)
-    beta_0 <- (1 - phat) * (1 - disp_BB)/(disp_BB)
-    alpha_0 <- phat*beta_0/(1 - phat)
+    ## In these settings a << b, so we first adjust a, then calculate b.
+    alpha_0 <- (1-mean_prop)*mean_prop^2/var_prop - mean_prop
+    alpha_0 <- vapply(alpha_0, function(a_est) {
+        if(a_est < lower){ lower
+            } else if (a_est > upper){ upper
+            } else a_est},
+        numeric(1))
+
+    beta_0 <- alpha_0*(1/mean_prop - 1)
 
     data.frame(a_0 = alpha_0, b_0 = beta_0)
 }
 
 ### Method of moments estimates  ==============================================
-getAB_MOM_ <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
-                       lower = 0, upper = Inf, ...){
+#' @export
+.getAB_MOM_prop <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
+                            lower = 1, upper = Inf, ...){
 
     mean_prop <- mean(prop, ...)
     var_prop <- var(prop, ...)
@@ -61,29 +60,27 @@ getAB_MOM_ <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
     c(a = a_est, b = b_est)
 }
 
-getAB_MOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
-                      lower = 0, upper = Inf, ...){
+#' @export
+.getAB_MOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
+                      lower = 1, upper = Inf, ...){
 
-    prop_dat <- get_phat(object)
-    mv_dat <- apply(prop_dat, 1, function(row){
-        c(mean = mean(row), var = var(row))
-    })
-
-    params <- apply(prop_dat, 1, getAB_MOM_, offsets = offsets,
+    prop_dat <- getPropReads(object)
+    params <- apply(prop_dat, 1, .getAB_MOM_prop, offsets = offsets,
                     lower = lower, upper = upper, ...)
 
     data.frame(a_0 = params[1, ], b_0 = params[2, ])
 }
 
 ### MLE estimates  ==============================================
-getAB_MLE_ <- function(prop, prop.offset = 1e-8, optim.method = "default",
-                       lower = 0, upper = Inf){
+#' @export
+.getAB_MLE_prop <- function(prop, prop.offset = 1e-8, optim.method = "default",
+                       lower = 1, upper = Inf){
 
     ## Add small offset when the proportion equals to 0
     prop <- prop + prop.offset*(prop == 0)
 
     ## Use MOM as initial values
-    start <- getAB_MOM_(prop)
+    start <- .getAB_MOM_prop(prop)
 
     optim.method <- if(optim.method == "default"){
         optim.method <- "L-BFGS-B"
@@ -93,7 +90,7 @@ getAB_MLE_ <- function(prop, prop.offset = 1e-8, optim.method = "default",
 
         log_lik <- -sum(dbeta(prop, par[["a"]], par[["b"]], log = TRUE))
         if(is.infinite(log_lik)){
-            sign(log_lik)*Machine$double.xmax
+            sign(log_lik)*.Machine$double.xmax
         } else log_lik
     }
 
@@ -104,21 +101,37 @@ getAB_MLE_ <- function(prop, prop.offset = 1e-8, optim.method = "default",
     c(a_0 = opt$par[["a"]], b_0 = opt$par[["b"]])
 }
 
-getAB_MLE <- function(object, prop.offset = 1e-8, optim.method = "default",
-                      lower = 0, upper = Inf){
-    prop_dat <- get_phat(object)
+#' @export
+.getAB_MLE <- function(object, prop.offset = 1e-8, optim.method = "default",
+                      lower = 1, upper = Inf){
 
-    params <- apply(prop_dat, 1, getAB_MLE_, prop.offset = prop.offset,
+    prop_dat <- getPropReads(object)
+
+    params <- apply(prop_dat, 1, .getAB_MLE_prop, prop.offset = prop.offset,
                     optim.method = optim.method, lower = lower, upper = upper)
 
     data.frame(a_0 = params[1, ], b_0 = params[2, ])
 }
 
 ### MLE estimates  ==============================================
+#' @export
 getAB <- function(object, method = "mom", ...){
 
-    if(method == "edgeR"){ getAB_edgeR(object)
-    } else if (method == "mle"){ getAB_MLE(object, ...)
-    } else getAB_MOM(object, ...)
+    ## Check that specified method is valid
+    if(!method %in% c("edgeR", "mle", "mom")){
+        stop(paste0("Invalid specified method for estimating a, b. ",
+                    "Valid methods are 'edgeR', 'mle', and 'mom'."))
+    }
 
+    if(is.vector(object)){
+        if (method == "mle"){ .getAB_MLE_prop(object, ...)
+        } else if (method == "mom") { .getAB_MOM_prop(object, ....)
+        } else stop("edgeR is not a valid method for vectors.")
+    } else if (is(object, "PhIPData")){
+        if(method == "mom"){ .getAB_MOM(object, ...)
+        } else if (method == "mle"){ .getAB_MLE(object, ...)
+        } else .getAB_edgeR(object, ...)
+    } else {
+        stop("Invalid inputs. 'object' must be a vector or a PhIPData object.")
+    }
 }

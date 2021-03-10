@@ -44,11 +44,14 @@ guessInits <- function(object, beads.prior){
     pi_guess <- colMeans(Z_guess)
 
     ## Guess attenuation constant
-    new_n <- colSums(Y*(1-Z_guess))
-    c_guess <- new_n/n
+    c_guess <- sapply(seq(N), function(index){
+        if(B[index] != 1){
+            coef(lm(Y[, index] ~ expected_rc[, index] - 1))
+        } else 1
+    })
 
     ## Guess fold change
-    expected_rc_attn <- vapply(new_n, function(n_i) n_i*expected_prop,
+    expected_rc_attn <- vapply(c_guess*n, function(n_i) n_i*expected_prop,
                                numeric(length(expected_prop)))
     phi_guess <- (1-Z_guess) + Y/expected_rc_attn*Z_guess
 

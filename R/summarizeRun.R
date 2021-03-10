@@ -1,3 +1,8 @@
+# tidySamples_one <- function(object, directory, sample, se.matrix,
+#                             burn.in = 0, post.thin = 1){
+#
+# }
+#' @export
 summarizeRun_one <- function(object, directory, sample, se.matrix,
                              burn.in = 0, post.thin = 1){
     file <- paste0(directory, "/", sample, ".rds")
@@ -44,6 +49,7 @@ summarizeRun_one <- function(object, directory, sample, se.matrix,
                 point_Z = point_Z))
 }
 
+#' @export
 summarizeRun <- function(object, directory, se.matrix,
                          burn.in = 0, post.thin = 1,
                          assay.names,
@@ -108,7 +114,7 @@ summarizeRun <- function(object, directory, se.matrix,
 
     ## Assign phi, phi_Z, and Z to assays
     assay <- c("phi", "phi_Z", "Z")[!is.na(assay.names[c("phi", "phi_Z", "Z")])]
-    assays(object)[assay] <- list(phi = point_phi, phi_Z = point_phi_Z,
+    assays(object)[assay.names[assay]] <- list(phi = point_phi, phi_Z = point_phi_Z,
                                   Z = point_Z)[assay]
     object
 }

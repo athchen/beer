@@ -1,4 +1,5 @@
-guessEnriched_edgeR <- function(object, threshold = 15, fc.name = "logfc"){
+#' @export
+.guessEnriched_edgeR <- function(object, threshold = 15, fc.name = "logfc"){
 
     ## Check that assay is present
     if(!fc.name %in% assayNames(object)){
@@ -14,7 +15,8 @@ guessEnriched_edgeR <- function(object, threshold = 15, fc.name = "logfc"){
     assay(object, fc.name) > threshold
 }
 
-guessEnriched_MLE <- function(object, threshold = 15, beads.prior){
+#' @export
+.guessEnriched_MLE <- function(object, threshold = 15, beads.prior){
 
     n <- librarySize(object)
 
@@ -29,21 +31,26 @@ guessEnriched_MLE <- function(object, threshold = 15, beads.prior){
 
     ## Rough estimate of attenuation constant
     ## Require an observed FC of 5 (w/o accounting for the attenuation constant)
-    guess_e <- apply(fc_beads, c(1, 2), function(x) if(x > 5) 0 else 1)
-    new_n <- colSums(guess_e*counts(object))
-    guess_e <- which(fc_beads > 1.5)
-    c_est <- new_n/n
+    guess_e <- apply(fc_beads, c(1, 2), function(x) ifelse(x > 5, 1, 0 ))
+    c_est <- vapply(seq(ncol(guess_e)), function(col) {
+        if(object$group[col] != getBeadsName()){
+            ne_peps <- !guess_e[, col]
+            coef(lm(counts(object)[ne_peps, col] ~
+                        expected_rc[ne_peps, col] - 1))
+        } else 1
+    }, numeric(1))
 
     ## Guess enriched peptides based on estimated attenuation constant
-    expected_rc_attn <- vapply(new_n, function(n_i) n_i*expected_prop,
+    expected_rc_attn <- vapply(n*c_est, function(n_i) n_i*expected_prop,
                                numeric(length(expected_prop)))
     fc_attn <- counts(object)/expected_rc_attn
 
     fc_attn > threshold
 }
 
-guessEnriched <- function(object, ..., method = "mle"){
+#' @export
+guessEnriched <- function(object, method = "mle", ...){
 
-    if(method == "edgeR"){ guessEnriched_edgeR(object, ...)
-    } else guessEnriched_MLE(object, ...)
+    if(method == "mle"){ .guessEnriched_MLE(object, ...)
+    } else .guessEnriched_edgeR(object, ...)
 }
