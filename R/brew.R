@@ -5,7 +5,12 @@
                 "a_phi", "b_phi", "a_c", "b_c", "fc")
 
     ## Set missing parameters to defaults
-    if(!"method" %in% names(prior.params)){ prior.params$method <- "mom"}
+    if(!"method" %in% names(prior.params)){
+        if(all(c("a_0", "b_0") %in% names(prior.params))){
+            prior.params$method <- "custom"
+        } else prior.params$method <- "mom"
+    }
+
     if(!all(c("a_0", "b_0") %in% names(prior.params))){
         beads_ab <- do.call(getAB, c(list(object = subsetBeads(object),
                                           method = prior.params$method),
@@ -24,9 +29,9 @@
     }
 
     ## Check that method is valid
-    if(!prior.params$method %in% c("edgeR", "mle", "mom")){
+    if(!prior.params$method %in% c("edgeR", "mle", "mom", "custom")){
         stop(paste0("Invalid specified method. ",
-                    "Valid methods are 'edgeR', 'mle', and 'mom'."))
+                    "Valid methods are 'custom', 'edgeR', 'mle', and 'mom'."))
     }
 
     ## Return only needed parameters
@@ -204,11 +209,17 @@ brew <- function(object,
         one_sample <- object[!se_peps[, sample], c(beads_id, sample)]
 
         ## Calculate new beads-only priors
-        new_beads <- do.call(getAB, c(list(object = subsetBeads(one_sample),
-                                           method = prior.params$method),
-                                      beads.args))
-        new_prior <- c(list(a_0 = new_beads[, "a_0"],
-                            b_0 = new_beads[, "b_0"]),
+        new_beads <- if(prior.params$method == "custom"){
+
+            lapply(beads.prior, function(x) x[!se_peps[, sample]])
+        } else {
+            do.call(getAB, c(list(object = subsetBeads(one_sample),
+                                  method = prior.params$method),
+                             beads.args))
+        }
+
+        new_prior <- c(list(a_0 = new_beads[["a_0"]],
+                            b_0 = new_beads[["b_0"]]),
                        prior.params[c("a_pi", "b_pi", "a_phi", "b_phi",
                                       "a_c", "b_c", "fc")])
         jags_run <- do.call(brew_one, c(list(object = one_sample,
