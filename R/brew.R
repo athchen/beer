@@ -58,7 +58,7 @@
 
     } else {
         if(!"threshold" %in% names(se.params)) se.params$threshold <- 15
-        if(!"beads.prior" %in% names(beads.prior))
+        if(!"beads.prior" %in% names(se.params))
             se.params$beads.prior <- beads.prior
 
         se.params[c("method", "threshold", "beads.prior")]
@@ -210,7 +210,6 @@ brew <- function(object,
 
         ## Calculate new beads-only priors
         new_beads <- if(prior.params$method == "custom"){
-
             lapply(beads.prior, function(x) x[!se_peps[, sample]])
         } else {
             do.call(getAB, c(list(object = subsetBeads(one_sample),
