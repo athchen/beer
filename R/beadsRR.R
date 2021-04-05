@@ -1,4 +1,5 @@
-beadsRR <- function(object, ...){
+beadsRR <- function(object, prior.params, beads.args, se.matrix,
+                    jags.params, sample.dir, parallel, parallel.params){
     for(sample in colnames(object)){
         if(!jags.params$quiet) {
             print(paste0(which(colnames(object) == sample), " of ", ncol(object)))
@@ -10,7 +11,7 @@ beadsRR <- function(object, ...){
 
         ## Calculate new beads-only priors
         new_beads <- if(prior.params$method == "custom"){
-            lapply(beads.prior, function(x) x[!se_peps[, sample]])
+            lapply(beads.prior, function(x) x[!se.matrix[, sample]])
         } else {
             do.call(getAB, c(list(object = subsetBeads(one_beads),
                                   method = prior.params$method),
@@ -26,6 +27,6 @@ beadsRR <- function(object, ...){
                                              prior.params = new_prior),
                                         jags.params))
 
-        saveRDS(jags_run, paste0(tmp_dir,"/", sample, ".rds"))
+        saveRDS(jags_run, paste0(sample.dir,"/", sample, ".rds"))
     }
 }

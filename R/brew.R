@@ -189,7 +189,7 @@ brew <- function(object,
     ## Create temporary directory for output of JAGS models
     tmp_dir <- if(is.null(sample.dir)) {
         paste0(tempdir(), "/beer_run", as.numeric(format(Sys.Date(), "%Y%m%d")))
-    } else sample.dir
+    } else normalizePath(sample.dir)
 
     if(dir.exists(tmp_dir)){
         delete <- menu(c("Yes", "No"),
@@ -205,8 +205,8 @@ brew <- function(object,
     ## Run
     if(beadsRR){
        if(!jags.params$quiet) cli::cli_h2("Beads-only round robin")
-        beadsRR(subsetBeads(object), prior.params, beads.args, se.params,
-                jags.params, sample.dir, parallel, parallel.params)
+        beadsRR(subsetBeads(object), prior.params, beads.args, se_peps,
+                jags.params, tmp_dir, parallel, parallel.params)
     }
 
     if(!jags.params$quiet) cli::cli_h2("Sample runs")
