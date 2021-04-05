@@ -27,13 +27,9 @@ edgeR_one <- function(object, sample, beads,
 
     ## edgeR output
     output <- edgeR::exactTest(data)$table
-
-    log10pval <- -log10(output$PValue)
-    # Truncate large p-values for storage reasons
-    log10pval <- ifelse(log10pval > 250.1, 250.1, log10pval)
-    ## Multiply by the sign of logfc so that negatively enriched peptides
-    ## do not appear as significant
-    # log10pval <- sign(output$logFC)*log10pval
+    # Convert to one-sided p-values and take -log10
+    log10pval <- ifelse(output$logFC > 0, -log10(output$PValue/2),
+                        -log10(1 - output$PValue/2))
 
     list(sample = sample,
          logfc = output$logFC,
