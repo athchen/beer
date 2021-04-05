@@ -1,4 +1,4 @@
-#' @include utils.R
+#' @include utils.R beadsRR.R getAB.R summarizeRun.R
 
 .tidyInputsPrior <- function(prior.params, object, beads.args){
     params <- c("method", "a_0", "b_0", "a_pi", "b_pi",
@@ -166,6 +166,7 @@ brew <- function(object,
                  sample.dir = NULL,
                  assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob",
                                  c = "metadata", pi = "metadata"),
+                 beadsRR = FALSE,
                  parallel = TRUE,
                  parallel.params = list()){
 
@@ -198,8 +199,17 @@ brew <- function(object,
     }
     dir.create(tmp_dir, recursive = TRUE)
 
-    ## Run sample at a time
+    ## Run model one sample at a time
     if(!jags.params$quiet) cli::cli_h1("Running JAGS")
+
+    ## Run
+    if(beadsRR){
+       if(!jags.params$quiet) cli::cli_h2("Beads-only round robin")
+        beadsRR(subsetBeads(object), prior.params, beads.args, se.params,
+                jags.params, sample.dir, parallel, parallel.params)
+    }
+
+    if(!jags.params$quiet) cli::cli_h2("Sample runs")
     for(sample in sample_id){
         if(!jags.params$quiet) {
             print(paste0(which(sample_id == sample), " of ", length(sample_id)))

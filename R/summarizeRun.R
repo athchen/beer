@@ -94,7 +94,7 @@ summarizeRun <- function(object, directory, se.matrix,
                          length(jags_files)))
         }
 
-        pattern <- paste0(directory, "/(.*)\\.rds")
+        pattern <- paste0(normalizePath(directory), "/(.*)\\.rds")
         sample <- regmatches(file, regexec(pattern, file))[[1]][2]
 
         out <- summarizeRun_one(object, directory, sample, se.matrix,
