@@ -175,7 +175,8 @@ brew <- function(object,
     ## Check and tidy inputs
     prior.params <- .tidyInputsPrior(prior.params, object, beads.args)
     beads.prior <- prior.params[c("a_0", "b_0")]
-    se.params <- .tidyInputsSE(se.params, beads.prior)
+    se.params <- if(!is.null(se.params)) { tidyInputsSE(se.params, beads.prior)
+    } else { NULL }
     jags.params <- .tidyInputsJAGS(jags.params)
     assay.names <- .tidyAssayNames(assay.names)
 
@@ -184,7 +185,11 @@ brew <- function(object,
     sample_id <- colnames(object[, object$group != getBeadsName()])
 
     ## Guess which peptides are super-enriched
-    se_peps <- do.call(guessEnriched, c(list(object = object), se.params))
+    se_peps <- if(is.null(se.params)){
+        matrix(FALSE, nrow(object), ncol(object))
+    } else {
+        do.call(guessEnriched, c(list(object = object), se.params))
+    }
 
     ## Create temporary directory for output of JAGS models
     tmp_dir <- if(is.null(sample.dir)) {
@@ -205,7 +210,8 @@ brew <- function(object,
     ## Run
     if(beadsRR){
        if(!jags.params$quiet) cli::cli_h2("Beads-only round robin")
-        beadsRR(subsetBeads(object), prior.params, beads.args, se_peps,
+        beadsRR(subsetBeads(object), method = "beer",
+                prior.params, beads.args, se_peps,
                 jags.params, tmp_dir, parallel, parallel.params)
     }
 

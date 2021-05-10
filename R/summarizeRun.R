@@ -34,10 +34,9 @@ summarizeRun_one <- function(object, directory, sample, se.matrix,
                             sample = sample,
                             peptide = rownames(object),
                             est_value = unname(colMeans(samples_phi)[pep_ind]),
-                            est_enriched = unname(colMeans(samples_phi*
-                                                               samples_Z)
+                            est_enriched = unname((colSums(samples_phi*samples_Z)/
+                                                      colSums(samples_Z))
                                                   [pep_ind]))
-
     point_Z <- data.frame(parameter = "Z",
                           sample = sample,
                           peptide = rownames(object),

@@ -38,13 +38,20 @@ edgeR_one <- function(object, sample, beads,
 
 #' @export
 edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
-                  assay.names = c(logfc = "logfc", prob = "prob")){
+                  assay.names = c(logfc = "logfc", prob = "prob"),
+                  beadsRR = FALSE){
 
     ## Derive dispersion estimates from beads-only samples
     edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
     common_disp <- edgeR_beads$common.dispersion
     tagwise_disp <- edgeR_beads$tagwise.dispersion
     trended_disp <- edgeR_beads$trended.dispersion
+
+    ## Do beadsRR if necessary
+    if(beadsRR){
+        object <- beadsRR(object, method = "edgeR",
+                          threshold.cpm, threshold.prevalence, assay.names)
+    }
 
     ## Set-up output matrices ----------
     ## Make empty matrix for the cases where fc and prob do not exist
