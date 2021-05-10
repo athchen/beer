@@ -175,7 +175,7 @@ brew <- function(object,
     ## Check and tidy inputs
     prior.params <- .tidyInputsPrior(prior.params, object, beads.args)
     beads.prior <- prior.params[c("a_0", "b_0")]
-    se.params <- if(!is.null(se.params)) { tidyInputsSE(se.params, beads.prior)
+    se.params <- if(!is.null(se.params)) { .tidyInputsSE(se.params, beads.prior)
     } else { NULL }
     jags.params <- .tidyInputsJAGS(jags.params)
     assay.names <- .tidyAssayNames(assay.names)
