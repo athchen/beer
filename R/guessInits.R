@@ -18,6 +18,7 @@
 # inits_list      list of initial values fed to JAGS. This includes:
 #                     theta, c, pi, Z, phi
 # -----------------------------
+#' @export
 guessInits <- function(object, beads.prior){
     ## Extract convenient parameters
     N <- ncol(object)
