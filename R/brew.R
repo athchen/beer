@@ -186,7 +186,8 @@ brew <- function(object,
 
     ## Guess which peptides are super-enriched
     se_peps <- if(is.null(se.params)){
-        matrix(FALSE, nrow(object), ncol(object))
+        matrix(FALSE, nrow(object), ncol(object),
+               dimnames = dimnames(object))
     } else {
         do.call(guessEnriched, c(list(object = object), se.params))
     }
