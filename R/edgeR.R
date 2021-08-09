@@ -1,4 +1,17 @@
-#' @export
+#' Estimate edgeR dispersion parameters from the beads-only data
+#'
+#' Wrapper function to estimate edgeR dispersion parameters from beads-only
+#' samples. Peptides can be pre-filtered based on a minimum read count per
+#' million (cpm) and the proportion of beads-only samples that surpass the cpm
+#' threshold.
+#'
+#' @param object PhIPData object (can have actual serum samples)
+#' @param threshold.cpm CPM threshold to be considered present in a sample
+#' @param threshold.prevalence proportion of beads-only samples that surpass
+#' \code{threshold.cpm}.
+#'
+#' @return a DGEList object with common, trended, and tagwise dispersion
+#' estimates
 .edgeRBeads <- function(object, threshold.cpm = 0, threshold.prevalence = 0){
     edgeR_beads <- as(PhIPData::subsetBeads(object), "DGEList")
 
@@ -7,7 +20,7 @@
     keep_ind <- rowSums(edgeR::cpm(edgeR_beads) >= threshold.cpm) >=
         threshold.prevalence
 
-    ## Estimate common dispersion in the beads-only data
+    ## Estimate common, trended, and tagwise dispersion in the beads-only data
     edgeR_beads <- edgeR_beads[keep_ind, , keep.lib.size = FALSE]
     edgeR_beads <- edgeR::calcNormFactors(edgeR_beads)
     edgeR_beads <- suppressMessages(edgeR::estimateDisp(edgeR_beads))
@@ -15,9 +28,16 @@
     edgeR_beads
 }
 
-#' @export
-edgeR_one <- function(object, sample, beads,
-                      common.disp, tagwise.disp, trended.disp){
+#' Run edgeR for one sample against all the beads-only samples.
+#'
+#' @param object PhIPData object
+#' @param sample sample name of the sample to compare against beads-only samples
+#' @param beads sample names for beads-only samples
+#' @param common.disp edgeR estimated common disperion parameter
+#' @param tagwise.dsip edgeR estimated tagwise dispersion parameter
+#' @param trended.disp edgeR estimated trended dispersion parameter
+.edgeR_one <- function(object, sample, beads,
+                       common.disp, tagwise.disp, trended.disp){
     ## Coerce into edgeR object
     ## Set common dispersion to disp estimated from beads-only samples
     data <- as(object[, c(beads, sample)], "DGEList")
@@ -36,12 +56,56 @@ edgeR_one <- function(object, sample, beads,
          log10pval = log10pval)
 }
 
+#' Run edgeR on PhIP-Seq data
+#'
+#'
+#' @param object PhIPData object
+#' @param threshold.cpm CPM threshold to be considered present in a sample
+#' @param threshold.prevalence proportion of beads-only samples that surpass
+#' \code{threshold.cpm}.
+#' @param assay.names named vector specifying the assay names for the log2(fold-change) and exact test p-values. The vector must have entries for `logfc` and
+#' `prob`.
+#' @param parallel list of parameters specifying the parallelization strategy
+#' as described in \code{\link{future::plan}{future::plan()}}.
+#' @param beadsRR logical value specifying whether each beads-only sample
+#' should be compared to all other beads-only samples.
+#'
+#' @return PhIPData object with log2 estimated fold-changes and p-values for
+#' enrichment stored in the assays specified by `assay.names`.
+#'
+#' @seealso \code{\link{future::plan}{future::plan()}}
+#' @seealso \code{\link{beer::beadsRR}{beer::beadsRR()}}
+#'
+#' @examples
+#' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
+#'
+#' ## Sequential evaluation
+#' edgeR(sim_data)
+#'
+#' ## Multisession evaluation
+#' \dontrun{
+#' edgeR(sim_data, parallel = list(strategy = "multisession"))
+#' }
+#'
+#' @importFrom future.apply future_lapply
+#' @importFrom future plan
 #' @export
 edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                   assay.names = c(logfc = "logfc", prob = "prob"),
+                  parallel = list(strategy = "sequential"),
                   beadsRR = FALSE){
 
-    ## Derive dispersion estimates from beads-only samples
+    ## Check assay names
+    if(is.null(assay.names[["logfc"]])) assay.names[["logfc"]] <- "logfc"
+    if(is.null(assay.names[["prob"]])) assay.names[["prob"]] <- "prob"
+
+    ## Tidy parallelization inputs
+    parallel <- .tidyParallel(parallel)
+    ## Define plan and return current plan to oplan
+    oplan <- do.call(plan, parallel)
+    ## Rest to original plan on exit
+    on.exit(plan(oplan))
+
     edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
     common_disp <- edgeR_beads$common.dispersion
     tagwise_disp <- edgeR_beads$tagwise.dispersion
@@ -71,12 +135,15 @@ edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     sample_names <- colnames(object[, object$group != getBeadsName()])
     beads_names <- colnames(object[, object$group == getBeadsName()])
 
-    for(sample in sample_names){
-        output <- edgeR_one(object, sample, beads_names,
-                            common_disp, tagwise_disp, trended_disp)
+    output <- future.apply::future_lapply(sample_names, function(sample){
+        .edgeR_one(object, sample, beads_names,
+                   common_disp, tagwise_disp, trended_disp)
+    })
 
-        edgeR_fc[, output$sample] <- output$logfc
-        edgeR_pval[, output$sample] <- output$log10pval
+    # Unnest output items
+    for(result in output){
+        edgeR_fc[, result$sample] <- result$logfc
+        edgeR_pval[, result$sample] <- result$log10pval
     }
 
     ## append to object

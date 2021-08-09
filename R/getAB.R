@@ -1,7 +1,14 @@
 #' @include edgeR.R utils.R
 
 ### edgeR estimates  ==============================================
-#' @export
+#' Derive beta shape parameters using edgeR dispersion estimates
+#'
+#' Given a PhIPData object, beads-only shape parameters are estimated by first
+#' deriving the edgeR dispersion estimate \eqn{\phi^{edgeR}}. \eqn{\phi^{edgeR}}
+#' corresponds to
+#'
+#' @param object PhIPData object
+#' @param threshold.cpm cpm thre
 .getAB_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                          lower = 1, upper = Inf){
 
@@ -64,7 +71,7 @@
 .getAB_MOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
                       lower = 1, upper = Inf, ...){
 
-    prop_dat <- getPropReads(object)
+    prop_dat <- PhIPData::propReads(object)
     params <- apply(prop_dat, 1, .getAB_MOM_prop, offsets = offsets,
                     lower = lower, upper = upper, ...)
 
@@ -105,7 +112,7 @@
 .getAB_MLE <- function(object, prop.offset = 1e-8, optim.method = "default",
                       lower = 1, upper = Inf){
 
-    prop_dat <- getPropReads(object)
+    prop_dat <- propReads(object)
 
     params <- apply(prop_dat, 1, .getAB_MLE_prop, prop.offset = prop.offset,
                     optim.method = optim.method, lower = lower, upper = upper)

@@ -12,6 +12,12 @@ coverage](https://codecov.io/gh/athchen/beer/branch/master/graph/badge.svg)](htt
 
 The goal of beer is to …
 
+## TO-DO
+
+-   Add bioarxiv link to @seealso in `phipseq_model.R`
+-   Update rest of `README.Rmd`
+-   Change data pointer in `inst/extdata/sim_data.R`
+
 ## Installation
 
 You can install the released version of beer from

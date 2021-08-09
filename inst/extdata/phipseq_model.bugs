@@ -1,20 +1,23 @@
 ### JAGS model for PhIP-seq antibody detection
 # ----- data -----
 # N             number of samples (including beads-only)
-# B             vector indicating whether the sample is a negative control sample or not
+# B             vector indicating whether the sample is a negative control
+#               sample or not
 # n             vector of library sizes
 # P             number of peptides
 # Y             matrix of observed reads
-
+#
 # ----- Prior parameters -----
-# a_0, b_0      vector of peptide-specific prior parameters for the beads_only samples
+# a_0, b_0      vector of peptide-specific prior parameters for the beads_only
+#               samples
 # a_c, b_c      prior parameters for the attenuation constants
 # a_pi, b_pi    prior parameters for the probability of enrichment
 # a, b          matrix of prior parameters for probabilities of pulling a read
-#               (Note: if sample j is a beads_only row, then a[, j] = a_0 and b[, j] = b_0)
+#               (Note: if sample j is a beads_only sample, then a[, j] = a_0
+#               and b[, j] = b_0)
 # a_phi, b_phi  prior parameters for the fold change for enriched peptides.
 # fc            minimum fold change
-
+#
 # ----- parameters of interest -----
 # c             vector of attenuation constants for each sample
 # pi            vector of enrichment probabilities for each sample
@@ -27,12 +30,18 @@
 # c_sample      vector of attenuation constants, assuming B[j] = 0 for all j
 # pi_sample     matrix of enrichment probabilities, assuming B[j] = 0 for all j
 # phi_enriched  matrix of enrichment factors, 1 if the peptide is not enriched.
-# mean_ne       matrix of average probability of pulling a read, assuming non-enriched peptide in a sample
-# var_ne        matrix of variance for probability of pulling a read, assuming non-enriched peptide
-# mean_e        matrix of average probability of pulling a read, assuming an enriched peptide
-# var_ne        matrix of variance for probability of pulling a read, assuming an enriched peptide
-# loglik_ij     matrix of log-likelihood contribution for parameters indexed by i and j
-# loglik_j      matrix of log-likelihood contribution for parameters only indexed by j
+# mean_ne       matrix of average probability of pulling a read, assuming
+#               non-enriched peptide in a sample
+# var_ne        matrix of variance for probability of pulling a read, assuming
+#               non-enriched peptide
+# mean_e        matrix of average probability of pulling a read, assuming an
+#               enriched peptide
+# var_ne        matrix of variance for probability of pulling a read, assuming
+#               an enriched peptide
+# loglik_ij     matrix of log-likelihood contribution for parameters indexed by
+#               i and j
+# loglik_j      matrix of log-likelihood contribution for parameters only
+#               indexed by j
 
 model {
   for(j in 1:N){
