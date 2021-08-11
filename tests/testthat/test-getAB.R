@@ -1,4 +1,4 @@
-sim_data <- readRDS(file.path("..", "..", "inst/extdata/sim_data.rds"))
+sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 test_that("Valid beta parameter estimates are derived from PhIPData objects", {
     expect_silent(getAB(sim_data, "mom"))

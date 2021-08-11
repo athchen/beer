@@ -1,4 +1,4 @@
-sim_data <- readRDS(file.path("..", "..", "inst/extdata/sim_data.rds"))
+sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 test_that("Counts matrices are properly checked for integer values", {
     expect_silent(.checkCounts(sim_data))

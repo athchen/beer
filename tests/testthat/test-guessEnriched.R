@@ -1,4 +1,4 @@
-sim_data <- readRDS(file.path("..", "..", "inst/extdata/sim_data.rds"))
+sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 edgeR_out <- edgeR(sim_data)
 
 test_that("Clearly enriched peptides are accurately identified with edgeR", {
