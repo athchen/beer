@@ -5,7 +5,8 @@
 #' million (cpm) and the proportion of beads-only samples that surpass the cpm
 #' threshold.
 #'
-#' @param object PhIPData object (can have actual serum samples)
+#' @param object \code{\link[PhIPData]{PhIPData}} object (can have actual serum
+#' samples)
 #' @param threshold.cpm CPM threshold to be considered present in a sample
 #' @param threshold.prevalence proportion of beads-only samples that surpass
 #' \code{threshold.cpm}.
@@ -30,7 +31,7 @@
 
 #' Run edgeR for one sample against all the beads-only samples.
 #'
-#' @param object PhIPData object
+#' @param object \code{\link[PhIPData]{PhIPData}} object
 #' @param sample sample name of the sample to compare against beads-only samples
 #' @param beads sample names for beads-only samples
 #' @param common.disp edgeR estimated common disperion parameter
@@ -59,7 +60,7 @@
 #' Run edgeR on PhIP-Seq data
 #'
 #'
-#' @param object PhIPData object
+#' @param object \code{\link[PhIPData]{PhIPData}} object
 #' @param threshold.cpm CPM threshold to be considered present in a sample
 #' @param threshold.prevalence proportion of beads-only samples that surpass
 #' \code{threshold.cpm}.
@@ -73,8 +74,8 @@
 #' @return PhIPData object with log2 estimated fold-changes and p-values for
 #' enrichment stored in the assays specified by `assay.names`.
 #'
-#' @seealso \code{\link{future::plan}{future::plan()}}
-#' @seealso \code{\link{beer::beadsRR}{beer::beadsRR()}}
+#' @seealso \code{\link[future]{plan}}
+#' @seealso \code{\link{beadsRR}}
 #'
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))

@@ -1,23 +1,31 @@
-# ----- guess_inits.R --------------
-# Function to give crude initial values for JAGS to avoid slice sampler getting stuck.
-# Initial values are found as follows:
-#     1. theta_guess[i, j] = Y[i, j]/n[i], or the is the MLE for theta
-#     2. Z_guess[i, j] = 1 if the i is a sample, and the observed rc is >2x the expected rc assuming c[i] = 1
-#     3. pi_guess[i] is the mean of row i
-#     3. c_guess[i] is the estimated slope from regressing the observed rc to expected rc assuming c[i] = 1 for non-enriched peptides
-#     4. phi_guess[i,j] = Y[i, j]/(n[i]*c_guess[i]*a_0[j]/(a_0[j] + b_0[j]))
-# Note: we can imagine re-estimating Z_guess and c_guess given phi_guess to get closer estimates.
-# ----- depends -----
-# tidyverse
-# stats
-# ----- input -----
-# data_list       list of simulation parameters fed to JAGS. This includes:
-#                     N, P, B, n, Y, a_0, b_0, a_c,
-#                     b_c, a_pi, b_pi, a_phi, b_phi, fc
-# ----- output -----
-# inits_list      list of initial values fed to JAGS. This includes:
-#                     theta, c, pi, Z, phi
-# -----------------------------
+#' @title Derive initial estimates of unknown model parameters
+#'
+#' @description To reduce converge time and to reduce the likelihood of the slice sampler
+#' getting stick, we use maximum likelihood to derive initial estimates for
+#' unknown model parameters.
+#'
+#' @details Briefly initial values are defined as follows:
+#' \enumerate{
+#'     \item \code{theta_guess[i, j] = Y[i, j]/n[j]}, or the the MLE for theta.
+#'     \item \code{Z_guess[i, j] = 1} if \eqn{j} is a serum sample, and the
+#'     observed read count is >2x the expected read count assuming
+#'     \code{c[j] = 1}.
+#'     \item \code{pi_guess[j]} is the mean of column \eqn{j} in \code{Z_guess}.
+#'     \item \code{c_guess[j]} is the estimated slope from regressing the
+#'     observed read counts against the expected read counts (without adjusting
+#'     for the attenuation constant) for non-enriched peptides only.
+#'     \item \code{phi_guess[i,j]} is the ratio of the observed read counts to
+#'     the expected read counts multiplied by the attenuation constant.
+#' }
+#'
+#' @param object a \code{\link[PhIPData]{PhIPData}} object
+#' @param beads.prior a data frame with two columns (named a_0, b_0) containing
+#' estimated shape parameters from beads-only samples.
+#'
+#' @return a list of estimated initial values.
+#'
+#' @seealso \emph{Appendix} in the Chen et. al 2022
+#'
 #' @export
 guessInits <- function(object, beads.prior){
     ## Extract convenient parameters

@@ -14,7 +14,7 @@ edgeR(
 )
 }
 \arguments{
-\item{object}{PhIPData object}
+\item{object}{\code{\link[PhIPData]{PhIPData}} object}
 
 \item{threshold.cpm}{CPM threshold to be considered present in a sample}
 
@@ -50,7 +50,7 @@ edgeR(sim_data, parallel = list(strategy = "multisession"))
 
 }
 \seealso{
-\code{\link{future::plan}{future::plan()}}
+\code{\link[future]{plan}}
 
-\code{\link{beer::beadsRR}{beer::beadsRR()}}
+\code{\link{beadsRR}}
 }

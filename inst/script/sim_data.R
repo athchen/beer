@@ -124,5 +124,7 @@ sim_data <- PhIPData(counts = Y,
                      peptideInfo = pep_params,
                      sampleInfo = sample_params,
                      metadata = prior_params)
+assays(sim_data)[c("true_Z", "true_phi", "true_a", "true_b", "true_theta")] <-
+    list(true_Z = Z, true_phi = phi, true_a = a, true_b = b, true_theta = theta)
 
 saveRDS(sim_data, "inst/extdata/sim_data.rds")

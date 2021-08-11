@@ -1,14 +1,27 @@
 #' @include edgeR.R utils.R
 
 ### edgeR estimates  ==============================================
-#' Derive beta shape parameters using edgeR dispersion estimates
+#' @title Derive beta shape parameters using edgeR dispersion estimates
 #'
-#' Given a PhIPData object, beads-only shape parameters are estimated by first
-#' deriving the edgeR dispersion estimate \eqn{\phi^{edgeR}}. \eqn{\phi^{edgeR}}
-#' corresponds to
+#' Given a \code{\link[PhIPData]{PhIPData}} object, beads-only shape parameters
+#' are estimated by first deriving the peptide-specific edgeR dispersion
+#' estimate \eqn{\phi^{edgeR}}. \eqn{\phi^{edgeR}} corresponds to the squared
+#' coefficient of variation for the proportion of reads pulled for a given
+#' peptide. Using \eqn{\phi^{edgeR}} to derive an estimate of the variance for
+#' the proportion of reads pulled by a single peptide, the mean and variance are
+#' converted to shape parameters of a beta distribution.
 #'
-#' @param object PhIPData object
-#' @param threshold.cpm cpm thre
+#' @param object a \code{\link[PhIPData]{PhIPData}} object.
+#' @param threshold.cpm CPM threshold to be considered present in a sample.
+#' @param threshold.prevalence proportion of beads-only samples that surpass
+#' \code{threshold.cpm}.
+#' @param lower minimum value of the beta shape parameters.
+#' @param upper maximum value of the beta shape parameters.
+#'
+#' @return dataframe with rows corresponding to peptides and columns
+#' corresponding to estimated shape parameters of the beta distribution.
+#'
+#' @seealso [.edgeRBeads()] for estimating \eqn{\phi^{edgeR}}
 .getAB_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                          lower = 1, upper = Inf){
 
@@ -32,7 +45,17 @@
 }
 
 ### Method of moments estimates  ==============================================
-#' @export
+#' Helper function to derive MOM estimates of a, b from a vector of proportions
+#'
+#' @param prop vector of proportions.
+#' @param offsets vector defining the offset to use when the mean and/or
+#' variance are zero.
+#' @param lower lowerbound for the shape parameters.
+#' @param upper upper bound for the shape parameters.
+#' @param ... parameters passed to \code{\link[base]{mean}} and
+#' \code{\link[base]{var}}.
+#'
+#' @return a data frame with MOM estimates of a, b
 .getAB_MOM_prop <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
                             lower = 1, upper = Inf, ...){
 
@@ -67,7 +90,17 @@
     c(a = a_est, b = b_est)
 }
 
-#' @export
+#' Wrapper function to derive MOM estimates of a, b from beads-only samples
+#'
+#' @param object a \code{\link[PhIPData]{PhIPData}} object.
+#' @param offsets vector defining the offset to use when the mean and/or
+#' variance are zero.
+#' @param lower lowerbound for the shape parameters.
+#' @param upper upper bound for the shape parameters.
+#' @param ... parameters passed to \code{\link[base]{mean}} and
+#' \code{\link[base]{var}}.
+#'
+#' @return a data frame with MOM estimates of a, b
 .getAB_MOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
                       lower = 1, upper = Inf, ...){
 
@@ -79,7 +112,17 @@
 }
 
 ### MLE estimates  ==============================================
-#' @export
+#' Helper function to derive MLE estimates of a, b from a vector of proportions
+#'
+#' @param prop vector of proportions.
+#' @param prop.offset offset to use when the proportion of reads is 0.
+#' @param optim.method optimization method passed to \code{\link[stats]{optim}}.
+#' @param lower lowerbound for the shape parameters.
+#' @param upper upper bound for the shape parameters.
+#'
+#' @return a data frame of MLE estimates of a, b
+#'
+#' @seealso \code{\link[stats]{optim}} for available optimization methods
 .getAB_MLE_prop <- function(prop, prop.offset = 1e-8, optim.method = "default",
                        lower = 1, upper = Inf){
 
@@ -108,7 +151,17 @@
     c(a_0 = opt$par[["a"]], b_0 = opt$par[["b"]])
 }
 
-#' @export
+#' Wrapper function to derive MLE estimates of a, b from beads-only samples
+#'
+#' @param object a \code{\link[PhIPData]{PhIPData}} object
+#' @param prop.offset offset to use when the proportion of reads is 0.
+#' @param optim.method optimization method passed to \code{\link[stats]{optim}}.
+#' @param lower lowerbound for the shape parameters.
+#' @param upper upper bound for the shape parameters.
+#'
+#' @return a data frame of MLE estimates of a, b
+#'
+#' @seealso \code{\link[stats]{optim}} for available optimization methods
 .getAB_MLE <- function(object, prop.offset = 1e-8, optim.method = "default",
                       lower = 1, upper = Inf){
 
@@ -120,7 +173,84 @@
     data.frame(a_0 = params[1, ], b_0 = params[2, ])
 }
 
-### MLE estimates  ==============================================
+### Estimating beads-only shape parameters  ==================================
+#' Estimate beads-only shape parameters
+#'
+#' @description Beta shape parameters are estimated using the proportion of
+#' reads-pulled per petide across the beads-only samples. Currently, only three
+#' estimation methods are supported: edgeR, method of moments (MOM),
+#' maximum likelihood (MLE). Note that edgeR can only be used on
+#' \code{\link[PhIPData]{PhIPData}} objects while MOM and MLE methods can also
+#' be applied to vectors of values between 0 and 1. Parameters that can be
+#' passed to each method are listed in the details.
+#'
+#' @details \strong{edgeR} derived estimates rely on edgeR's peptide-specific
+#' dispersion estimates, denoted \eqn{\phi^{edgeR}}. \eqn{\phi^{edgeR}}
+#' corresponds to the squared coefficient of variation for the proportion of
+#' reads pulled for a given peptide. Using \eqn{\phi^{edgeR}} to derive an
+#' estimate of the variance for the proportion of reads pulled by a single
+#' peptide, the mean and variance are transformed into shape parameters
+#' satisfying the lower and upper bounds. When \code{method = "edgeR"}, the
+#' following additional parameters can be specified.
+#'
+#' \itemize{
+#'     \item \code{threshold.cpm}: CPM threshold to be considered present in
+#'     a sample.
+#'     \item \code{threshold.prevalence}: proportion of beads-only samples
+#'     that surpass \code{threshold.cpm}.
+#'     \item \code{lower}: minimum value of the beta shape parameters.
+#'     \item \code{upper}: maximum value of the beta shape parameters.
+#' }
+#'
+#' \strong{Method of Moments (MOM)} estimates are derived by transforming the
+#' sample mean and variance to shape parameters of the beta distribution. For
+#' \code{method = "mom"}, the following parameters can be adjusted:
+#'
+#' \itemize{
+#'     \item \code{offsets}: vector defining the offset to use when the mean
+#'     and/or variance are zero.
+#'     \item \code{lower}: lowerbound for the shape parameters.
+#'     \item \code{upper}: upper bound for the shape parameters.
+#'     \item \code{...}: parameters passed to \code{\link[base]{mean}} and
+#'     \code{\link[base]{var}}.
+#' }
+#'
+#' \strong{Maximum Likelihood (MLE)} estimates rely on
+#' \code{\link[stats]{optim}} to derive shape parameters that maximize the
+#' likelihood of observed data. By default the L-BFGS-B optimization method is
+#' used. Parameters for MLE estimates include:
+#'
+#' \itemize{
+#'      \item \code{prop.offset}: offset to use when the proportion of reads
+#'      is 0.
+#'      \item \code{optim.method}: optimization method passed to
+#'      \code{\link[stats]{optim}}.
+#'      \item \code{lower}: lowerbound for the shape parameters.
+#'      \item \code{upper}: upper bound for the shape parameters.
+#' }
+#'
+#' @param object a \code{\link[PhIPData]{PhIPData}} object or a vector
+#' @param method one of \code{c("edgeR", "mle", "mom")} designating which method
+#' to use to estimate beads-only prior parameters. MOM is the default method
+#' used to estimate shape parameters.
+#' @param ... parameters passed to specific estimating functions. See details
+#' for more information
+#'
+#' @return a data frame of beta shape parameters where each row corresponds to
+#' a peptide.
+#'
+#' @examples
+#' ## PhIPData object
+#' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
+#'
+#' getAB(sim_data, method = "edgeR")
+#' getAB(sim_data, method = "mle")
+#' getAB(sim_Data, method = "mom")
+#'
+#' ## Vector of proportions
+#' prop <- rbeta(100, 2, 8)
+#' getAB(prop, method = "mle")
+#' getAB(prop, method = "mom")
 #' @export
 getAB <- function(object, method = "mom", ...){
 
@@ -131,6 +261,12 @@ getAB <- function(object, method = "mom", ...){
     }
 
     if(is.vector(object)){
+        ## Check that valid inputs are between 0 and 1
+        if(any(!is.numeric(object)) | max(object) > 1 | min(object) < 0){
+            stop(paste0("Invalid inputs. Vectors can only contain numeric ",
+                        "values between 0 and 1"))
+        }
+
         if (method == "mle"){ .getAB_MLE_prop(object, ...)
         } else if (method == "mom") { .getAB_MOM_prop(object, ....)
         } else stop("edgeR is not a valid method for vectors.")
@@ -139,6 +275,7 @@ getAB <- function(object, method = "mom", ...){
         } else if (method == "mle"){ .getAB_MLE(object, ...)
         } else .getAB_edgeR(object, ...)
     } else {
-        stop("Invalid inputs. 'object' must be a vector or a PhIPData object.")
+        stop(paste0("Invalid inputs. 'object' must be a vector of values ",
+                    "between 0 and 1 or a PhIPData object."))
     }
 }

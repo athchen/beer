@@ -7,7 +7,8 @@
 .edgeRBeads(object, threshold.cpm = 0, threshold.prevalence = 0)
 }
 \arguments{
-\item{object}{PhIPData object (can have actual serum samples)}
+\item{object}{\code{\link[PhIPData]{PhIPData}} object (can have actual serum
+samples)}
 
 \item{threshold.cpm}{CPM threshold to be considered present in a sample}
 

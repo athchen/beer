@@ -7,7 +7,7 @@
 .edgeR_one(object, sample, beads, common.disp, tagwise.disp, trended.disp)
 }
 \arguments{
-\item{object}{PhIPData object}
+\item{object}{\code{\link[PhIPData]{PhIPData}} object}
 
 \item{sample}{sample name of the sample to compare against beads-only samples}
 
