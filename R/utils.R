@@ -9,6 +9,31 @@
     }
 }
 
+#' Function to check whether an assay will be overwritten
+#'
+#' If the an assay is not specified (e.g. with \code{NA}), then
+#' \code{.checkOverwrite()} will return \code{FALSE} (rather than NA).
+#'
+#' @param object PhIPData object
+#' @param assay.names character vector of assay names
+#'
+#' @return logical vector indicating whether data in an assay will be
+#' overwritten
+.checkOverwrite <- function(object, assay.names){
+    ## check metadata objects
+    in_meta <- ifelse(assay.names == "metadata",
+                      names(assay.names)[assay.names == "metadata"] %in%
+                          names(metadata),
+                      FALSE)
+
+    in_assay <- vapply(assay.names, function(name){
+        if(name %in% assayNames(object)) any(!is.na(assay(object, name)))
+        else FALSE
+    }, logical(1))
+
+    ifelse(is.na(in_meta | in_assay), FALSE, in_meta | in_assay)
+}
+
 #' Function to tidy inputs pertaining to parallelization
 #'
 #' This function ensures that the specified plan is in the list of valid
@@ -24,7 +49,16 @@
     valid_strat <- c("sequential", "transparent", "multisession",
                      "multicore", "cluster", "remote")
 
-    if(is.null(parallel[["strategy"]])) parallel[["strategy"]] <- "sequential"
+    ## Convert to list if parallel is a character vector
+    ## The first entry always defines the plan
+    if(is.vector(parallel)) {
+        strat <- ifelse("strategy" %in% names(parallel),
+                        parallel[["strategy"]],
+                        parallel[1])
+        workers <- if("workers" %in% names(parallel)) { parallel[["workers"]]
+        } else NULL
+        parallel <- list(strategy = strat, workers = as.numeric(workers))
+    }
 
     ## Check that strategy is valid
     if (!all(parallel[["strategy"]] %in% valid_strat)) {

@@ -8,14 +8,18 @@ test_that("Counts matrices are properly checked for integer values", {
     expect_error(.checkCounts(sim_data), "`counts` entries must be integers.")
 })
 
+test_that("Non-empty assays are correctly identified", {
+    expect_equal(unname(.checkOverwrite(sim_data, c("counts", "logfc"))),
+                 c(TRUE, FALSE))
+})
 
-test_that("Parallelization paramers are correclty tidied", {
+test_that("Parallelization paramers are correctly tidied", {
 
-    ## Missing plan should default to sequential
-    parallel <- list()
+    ## Convert vector to list
+    parallel <- "sequential"
     expect_equal(.tidyParallel(parallel)[["strategy"]], "sequential")
 
-    ## Misspecified plan
+    ## Invalid plan
     parallel[["strategy"]] <- "test"
     expect_error(.tidyParallel(parallel),
                  "The specified parallel strategy is not supported.")
