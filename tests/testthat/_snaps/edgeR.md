@@ -3,7 +3,7 @@
     Code
       edgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
-      ! The following assays are not empty and will be overwritten: counts
+      ! Values in the following assays will be overwritten: counts
     Output
       class: PhIPData 
       dim: 50 10 
@@ -20,7 +20,7 @@
     Code
       edgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
-      [33m![39m The following assays are not empty and will be overwritten: counts
+      [33m![39m Values in the following assays will be overwritten: counts
     Output
       class: PhIPData 
       dim: 50 10 
@@ -37,7 +37,7 @@
     Code
       edgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
-      ! The following assays are not empty and will be overwritten: counts
+      ! Values in the following assays will be overwritten: counts
     Output
       class: PhIPData 
       dim: 50 10 
@@ -54,7 +54,7 @@
     Code
       edgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
-      [33m![39m The following assays are not empty and will be overwritten: counts
+      [33m![39m Values in the following assays will be overwritten: counts
     Output
       class: PhIPData 
       dim: 50 10 
