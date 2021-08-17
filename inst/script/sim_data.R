@@ -7,7 +7,7 @@
 load("~/Dropbox/KK/data/20190711_8plates_new.rda")
 
 # Select 100 peptides
-hiv_peps <- grep("Human immunodeficiency virus", fdata$taxon_species)[1:100]
+hiv_peps <- grep("Human immunodeficiency virus", fdata$taxon_species)[1:50]
 
 # Select beads-only samples
 beads_ind <- which(pdata$study == "BEADS_ONLY" &
@@ -26,7 +26,7 @@ set.seed(20210223)
 
 # Constants
 N <- 10
-P <- 100
+P <- 50
 B <- c(rep(1, 4), rep(0, 6))
 n <- round(abs(rnorm(N, 1e6, 1e5)))
 
@@ -42,7 +42,7 @@ b_0 <- beads_params$b_0
 # proportion of peptides enriched
 pi <- c(rep(0, sum(B)), rep(0.05, N - sum(B)))
 Z <- cbind(matrix(0, nrow = P, ncol = sum(B)),
-           sapply(1:(N - sum(B)), function(x) sample(c(rep(1, 5), rep(0, 95)))))
+           sapply(1:(N - sum(B)), function(x) sample(c(rep(1, 5), rep(0, 45)))))
 
 # fold-changes
 phi <- apply(Z, 2, function(x) {
