@@ -1,11 +1,22 @@
-# tidySamples_one <- function(object, directory, sample, se.matrix,
-#                             burn.in = 0, post.thin = 1){
-#
-# }
-#' @export
-summarizeRun_one <- function(object, directory, sample, se.matrix,
+#' Derive point estimates for c, pi, phi, and Z for a particular sample
+#'
+#' Posterior means are used as point estimates for \eqn{c}, \eqn{\pi},
+#' \eqn{\phi}, and \eqn{Z}. As super-enriched peptides are tossed out before
+#' MCMC sampling, super-enriched peptides return \code{NA} for the \eqn{\phi}
+#' and \eqn{Z} point estimates. Indices corresponding to a particular peptide in
+#' the MCMC sampler are mapped back to the original peptide names.
+#'
+#' @param object a \code{\link[PhIPData]{PhIPData}} object
+#' @param file path to rds file
+#' @param se.matrix logical matrix indicating which peptides were identified as
+#' super-enriched peptides
+#' @param burn.in number of iterations to be burned
+#' @param post.thin thinning parameter
+#'
+#' @return list of point estimates for c, pi, phi and Z
+summarizeRun_one <- function(object, file, se.matrix,
                              burn.in = 0, post.thin = 1){
-    file <- paste0(directory, "/", sample, ".rds")
+    sample <- regmatches(file, regexec("/([^/]*)\\.rds", file))[[1]][2]
 
     rds <- readRDS(file)
     mcmc_matrix <- as.matrix(rds)
@@ -42,19 +53,40 @@ summarizeRun_one <- function(object, directory, sample, se.matrix,
                           peptide = rownames(object),
                           est_value = unname(colMeans(samples_Z)[pep_ind]))
 
-    return(list(point_c = point_c,
-                point_pi = point_pi,
-                point_phi = point_phi,
-                point_Z = point_Z))
+    list(point_c = point_c,
+         point_pi = point_pi,
+         point_phi = point_phi,
+         point_Z = point_Z)
 }
 
-#' @export
+#' Summarize MCMC chain and return point estimates for BEER parameters
+#'
+#' Posterior means are used as point estimates for \eqn{c}, \eqn{\pi},
+#' \eqn{\phi}, and \eqn{Z}. As super-enriched peptides are tossed out before
+#' MCMC sampling, super-enriched peptides return \code{NA} for the \eqn{\phi}
+#' and \eqn{Z} point estimates. Indices corresponding to a particular peptide in
+#' the MCMC sampler are mapped back to the original peptide names.
+#'
+#' @param object a \code{\link[PhIPData]{PhIPData}} object
+#' @param directory path of the directory containing JAGS output
+#' @param se.matrix logical matrix indicating which peptides were identified as
+#' super-enriched peptides
+#' @param burn.in number of iterations to be burned
+#' @param post.thin thinning parameter
+#' @param assay.names named vector of specifying where to store point estimates
+#'
+#' @return PhIPData object with point estimates stored in the assays specified
+#' by `assay.names`.
 summarizeRun <- function(object, directory, se.matrix,
                          burn.in = 0, post.thin = 1,
-                         assay.names,
-                         quiet = TRUE){
+                         assay.names, quiet = FALSE){
 
     jags_files <- list.files(directory, full.names = TRUE)
+    samples <- vapply(
+        regmatches(jags_files, regexec("/([^/]*)\\.rds", jags_files)),
+        function(x) x[[2]],
+        character(1))
+    names(jags_files) <- samples
 
     ## Pre-allocate containers
     point_c <- if(assay.names["c"] %in% names(metadata(object))) {
@@ -83,28 +115,29 @@ summarizeRun <- function(object, directory, se.matrix,
     names(point_c) <- names(point_pi) <- colnames(point_phi) <-
         colnames(point_phi_Z) <- colnames(point_Z) <-
         colnames(object)
-
     rownames(point_phi) <- rownames(point_phi_Z) <- rownames(point_Z) <-
         rownames(object)
 
-    for(file in jags_files){
-        if(!quiet){
-            print(paste0(which(file == jags_files), " of ",
-                         length(jags_files)))
-        }
+    ## Summarize each file, use future_lapply here to enable reading/import
+    ## to be parallelized
+    progressr::handlers("txtprogressbar")
+    p <- progressr::progressor(along = jags_files)
+    files_out <- future_lapply(jags_files, function(file){
+        file_counter <- paste0(which(file == jags_files), " of ",
+                               length(jags_files))
+        p(file_counter, class = "sticky", amount = 1)
+        summarizeRun_one(object, file, se.matrix, burn.in, post.thin)
+    })
 
-        pattern <- paste0(directory, "/(.*)\\.rds")
-        sample <- regmatches(file, regexec(pattern, file))[[1]][2]
-
-        out <- summarizeRun_one(object, directory, sample, se.matrix,
-                                burn.in, post.thin)
+    for(out in files_out){
+        sample <- out$point_c$sample
 
         point_c[sample] <- out$point_c$est_value
         point_pi[sample] <- out$point_pi$est_value
         point_phi[, sample] <- out$point_phi$est_value
         point_phi_Z[, sample] <- out$point_phi$est_enriched
         point_Z[, sample] <- out$point_Z$est_value
-    }
+     }
 
     ## Assign c and pi to metadata
     add <- !vapply(assay.names[c("c", "pi")], is.na, logical(1))

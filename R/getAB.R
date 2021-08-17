@@ -251,6 +251,7 @@
 #' prop <- rbeta(100, 2, 8)
 #' getAB(prop, method = "mle")
 #' getAB(prop, method = "mom")
+#'
 #' @export
 getAB <- function(object, method = "mom", ...){
 
