@@ -250,7 +250,6 @@ NULL
 .brew_samples <- function(object, sample_id, beads_id, se.matrix,
                           prior.params, beads.prior, beads.args, jags.params,
                           tmp.dir){
-    cli::cli_text("Sample runs")
     progressr::handlers("txtprogressbar")
     p <- progressr::progressor(along = sample_id)
 
@@ -282,10 +281,10 @@ NULL
                                               quiet = TRUE),
                                          jags.params))
 
-        saveRDS(jags_run, paste0(tmp.dir,"/", sample, ".rds"))
+        saveRDS(jags_run, paste0(tmp.dir, "/", sample, ".rds"))
 
         Sys.getpid()
-    }, future.conditions = "message")
+    })
 
     jags_out
 }
@@ -362,7 +361,9 @@ NULL
 #' @param se.params named list of parameters specific to identifying clearly
 #' enriched peptides
 #' @param jags.params named list of parameters for running MCMC using JAGS
-#' @param sample.dir path to temporarily store RDS files for each sample run
+#' @param sample.dir path to temporarily store RDS files for each sample run,
+#' if \code{NULL} then \code{\link[base]{tmpdir}} is used to temporarily store
+#' MCMC output and cleaned afterwards.
 #' @param assay.names named vector indicating where MCMC results should be
 #' stored in the PhIPData object
 #' @param beadsRR logical value specifying whether each beads-only sample
@@ -447,17 +448,18 @@ brew <- function(object,
     ## Create temporary directory for output of JAGS models
     tmp.dir <- if(is.null(sample.dir)) {
         paste0(tempdir(), "/beer_run",
-               as.numeric(format(Sys.Date(), "%Y%m%d")),
-               as.numeric(Sys.time()))
+               as.numeric(format(Sys.Date(), "%Y%m%d")))
     } else normalizePath(sample.dir, mustWork = FALSE)
 
-    if(dir.exists(tmp.dir)){
-        delete <- menu(c("Yes", "No"),
-                       title = paste0("Specified directory for samples exists. ",
-                                      "Delete the existing directory?"))
-        if(delete == 1) unlink(tmp.dir, recursive = TRUE)
-    }
-    dir.create(tmp.dir, recursive = TRUE)
+    # Check if any sample files exist
+    samples_run <- if(beadsRR) c(beads_id, sample_id) else sample_id
+    samples_files <- paste0(tmp.dir, "/", samples_run, ".rds")
+    if(any(file.exists(samples_files))){
+        cli::cli_alert_warning(
+            paste0("Sample files already exist in the specified directory. ",
+                   "Some files may be overwritten.")
+        )
+    } else if (!dir.exists(tmp.dir)) { dir.create(tmp.dir, recursive = TRUE) }
 
     ## Check whether assays will be overwritten
     beads_over <- .checkOverwrite(object[, object$group == getBeadsName()],
@@ -479,25 +481,31 @@ brew <- function(object,
     cli::cli_h1("Running JAGS")
     if(beadsRR){
         cli::cli_text("Beads-only round robin")
-        beadsRR(subsetBeads(object), method = "beer",
-                prior.params, beads.args, se.matrix,
-                jags.params, tmp.dir, parallel, parallel.params)
+        progressr::with_progress({
+            beads_pid <- beadsRR(subsetBeads(object), method = "beer",
+                                 prior.params, beads.args, jags.params,
+                                 tmp.dir, assay.names, FALSE)
+        })
     }
 
-    pids <- .brew_samples(object, sample_id, beads_id, se.matrix,
-                          prior.params, beads.prior, beads.args, jags.params,
-                          tmp.dir)
+    cli::cli_text("Sample runs")
+    progressr::with_progress({
+        pids <- .brew_samples(object, sample_id, beads_id, se.matrix,
+                              prior.params, beads.prior, beads.args,
+                              jags.params, tmp.dir)
+    })
 
     ## Summarize output
     cli::cli_h1("Summarizing results")
-    run_out <- summarizeRun(object, tmp.dir, se.matrix,
+    run_out <- summarizeRun(object, samples_files,
+                            se.matrix,
                             burn.in = jags.params$burn.in,
                             post.thin = jags.params$post.thin,
                             assay.names, quiet = FALSE)
 
     ## Clean-up if necessary
     if(is.null(sample.dir)){
-        unlink(sample.dir, recursive = TRUE)
+        unlink(tmp.dir, recursive = TRUE)
     }
 
     run_out

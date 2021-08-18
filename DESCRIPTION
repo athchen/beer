@@ -8,8 +8,12 @@ Authors@R: c(person("Athena", "Chen", email = "achen70@jhu.edu",
     role = c("aut")), 
     person("Ingo", "Ruczinski", email = "ingo@jhu.edu", 
     role = c("aut")))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: BEER implements a Bayesian model for analyzing 
+    phage-immunoprecipitation sequencing (PhIP-seq) data. Given a PhIPData 
+    object, BEER returns posterior probabilities of enriched antibody responses, 
+    point estimates for the relative fold-change in comparison to negative
+    control samples, and more. Additionally, BEER provides a convenient 
+    implementation for using edgeR to identify enriched antibody responses.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
@@ -19,10 +23,13 @@ Depends:
     rjags
 Imports:
     BiocStyle, 
-    edgeR
+    edgeR,
+    cli,
+    future, 
+    future.apply, 
+    progressr
 Suggests: 
     testthat (>= 3.0.0),
-    cli,
     covr,
     knitr,
     rmarkdown

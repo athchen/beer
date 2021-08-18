@@ -13,6 +13,8 @@
 #'
 #' @return a DGEList object with common, trended, and tagwise dispersion
 #' estimates
+#'
+#' @importFrom edgeR calcNormFactors
 .edgeRBeads <- function(object, threshold.cpm = 0, threshold.prevalence = 0){
     edgeR_beads <- as(PhIPData::subsetBeads(object), "DGEList")
 
@@ -37,6 +39,10 @@
 #' @param common.disp edgeR estimated common disperion parameter
 #' @param tagwise.dsip edgeR estimated tagwise dispersion parameter
 #' @param trended.disp edgeR estimated trended dispersion parameter
+#'
+#' @return list with sample name, log2 fc estimate, and log10 p-value
+#'
+#' @importFrom edgeR exactTest
 .edgeR_one <- function(object, sample, beads,
                        common.disp, tagwise.disp, trended.disp){
     ## Coerce into edgeR object
@@ -64,8 +70,9 @@
 #' @param threshold.cpm CPM threshold to be considered present in a sample
 #' @param threshold.prevalence proportion of beads-only samples that surpass
 #' \code{threshold.cpm}.
-#' @param assay.names named vector specifying the assay names for the log2(fold-change) and exact test p-values. If the vector is not names, the first and
-#' second entries are used as defaults
+#' @param assay.names named vector specifying the assay names for the
+#' log2(fold-change) and exact test p-values. If the vector is not names, the
+#' first and second entries are used as defaults
 #' @param parallel character indicating which parallelization strategy to use.
 #' Alternatively, a named list of parameters available in
 #' \code{\link{future::plan}{future::plan()}}.

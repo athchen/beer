@@ -107,7 +107,7 @@ test_that("Assay names are correctly tidied", {
 })
 
 cli::test_that_cli("warns when overwriting sampleInfo", {
-    expect_snapshot(brew(sim_data))
+    expect_snapshot(brew(sim_data, jags.params = list(seed = 123)))
 
     ## Clean sampleInfo
     sampleInfo(sim_data)[, c("c", "pi")] <- NULL
@@ -119,6 +119,8 @@ test_that("brew can run with multisession and sequential evaluation", {
     ## Sequential, check that current plan is properly reset
     ## Also check that files are saved in the right directory
     ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
+    # if exists delete
+    if(dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
     brew_seq <- brew(sim_data, parallel = "sequential",
                      sample.dir = ex_dir,
                      jags.params = list(seed = 123))
@@ -134,4 +136,19 @@ test_that("brew can run with multisession and sequential evaluation", {
 
     ## Check that there's nothing different
     expect_identical(brew_seq, brew_multi)
+})
+
+test_that("brew works with beadsRR", {
+    expect_snapshot({
+        brew(sim_data, jags.params = list(seed = 123), beadsRR = TRUE)
+
+        ## Also check that files are saved in the right directory
+        ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
+        # if exists delete
+        if(dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
+        brew(sim_data, jags.params = list(seed = 123),
+             sample.dir = ex_dir, beadsRR = TRUE)
+        # Clean directory
+        unlink(ex_dir, recursive = TRUE)
+    })
 })

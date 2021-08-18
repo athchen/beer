@@ -31,3 +31,7 @@ test_that("edgeR runs with multisession and sequential evaluation", {
     ## Check that there's nothing different
     expect_identical(edgeR_seq, edgeR_multi)
 })
+
+test_that("edgeR works with beadsRR", {
+    expect_snapshot(edgeR(sim_data, beadsRR = TRUE))
+})
