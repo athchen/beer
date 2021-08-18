@@ -20,18 +20,17 @@
 #' @return logical vector indicating whether data in an assay will be
 #' overwritten
 .checkOverwrite <- function(object, assay.names){
-    ## check metadata objects
-    in_meta <- ifelse(assay.names == "metadata",
-                      names(assay.names)[assay.names == "metadata"] %in%
-                          names(metadata),
-                      FALSE)
+    ## check sampleInfo objects
+    in_sample <- ifelse(assay.names == "sampleInfo",
+                        names(assay.names) %in% colnames(sampleInfo(object)),
+                        FALSE)
 
     in_assay <- vapply(assay.names, function(name){
         if(name %in% assayNames(object)) any(!is.na(assay(object, name)))
         else FALSE
     }, logical(1))
 
-    ifelse(is.na(in_meta | in_assay), FALSE, in_meta | in_assay)
+    ifelse(is.na(in_sample | in_assay), FALSE, in_sample | in_assay)
 }
 
 #' Function to tidy inputs pertaining to parallelization

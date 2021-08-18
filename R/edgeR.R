@@ -64,10 +64,11 @@
 #' @param threshold.cpm CPM threshold to be considered present in a sample
 #' @param threshold.prevalence proportion of beads-only samples that surpass
 #' \code{threshold.cpm}.
-#' @param assay.names named vector specifying the assay names for the log2(fold-change) and exact test p-values. The vector must have entries for `logfc` and
-#' `prob`.
-#' @param parallel list of parameters specifying the parallelization strategy
-#' as described in \code{\link{future::plan}{future::plan()}}.
+#' @param assay.names named vector specifying the assay names for the log2(fold-change) and exact test p-values. If the vector is not names, the first and
+#' second entries are used as defaults
+#' @param parallel character indicating which parallelization strategy to use.
+#' Alternatively, a named list of parameters available in
+#' \code{\link{future::plan}{future::plan()}}.
 #' @param beadsRR logical value specifying whether each beads-only sample
 #' should be compared to all other beads-only samples.
 #'
@@ -85,20 +86,25 @@
 #'
 #' ## Multisession evaluation
 #' \dontrun{
-#' edgeR(sim_data, parallel = list(strategy = "multisession"))
+#' edgeR(sim_data, parallel = "multisession")
 #' }
 #'
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
+#' @importFrom cli cli_alert_warning
 #' @export
 edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                   assay.names = c(logfc = "logfc", prob = "prob"),
-                  parallel = list(strategy = "sequential"),
+                  parallel = "sequential",
                   beadsRR = FALSE){
 
-    ## Check assay names
-    if(is.null(assay.names[["logfc"]])) assay.names[["logfc"]] <- "logfc"
-    if(is.null(assay.names[["prob"]])) assay.names[["prob"]] <- "prob"
+    # Add names to assay.names vector
+    if(is.null(names(assay.names))) {
+        names(assay.names) <- c("logfc", "prob")[1:length(assay.names)]
+    }
+    ## Check for unnamed vectors or missing names
+    if(is.na(assay.names["logfc"])) assay.names[["logfc"]] <- "logfc"
+    if(is.na(assay.names["prob"])) assay.names[["prob"]] <- "prob"
 
     ## Tidy parallelization inputs
     parallel <- .tidyParallel(parallel)
@@ -111,6 +117,21 @@ edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     common_disp <- edgeR_beads$common.dispersion
     tagwise_disp <- edgeR_beads$tagwise.dispersion
     trended_disp <- edgeR_beads$trended.dispersion
+
+    ## Check whether assays will be overwritten
+    beads_over <- .checkOverwrite(object[, object$group == getBeadsName()],
+                                  assay.names)
+    sample_over <- .checkOverwrite(object[ ,object$group != getBeadsName()],
+                                   assay.names)
+    msg <- if(beadsRR & any(beads_over | sample_over, na.rm = TRUE)){
+        paste0("Values in the following assays will be overwritten: ",
+               paste0(assay.names[beads_over | sample_over], collapse = ", "))
+    } else if (!beadsRR & any(sample_over, na.rm = TRUE)) {
+        paste0("Values in the following assays will be overwritten: ",
+               paste0(assay.names[beads_over & sample_over], collapse = ", "))
+    } else character(0)
+
+    if(length(msg) > 0) cli::cli_alert_warning(msg)
 
     ## Do beadsRR if necessary
     if(beadsRR){

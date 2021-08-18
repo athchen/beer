@@ -13,6 +13,27 @@ test_that("Non-empty assays are correctly identified", {
                  c(TRUE, FALSE))
 })
 
+test_that("Overwritten assays are identified", {
+    tmp_data <- sim_data
+    assay.names <- c(phi = NA, phi_Z = "logfc", Z = "prob",
+                     c = "sampleInfo", pi = "sampleInfo")
+
+    ## Non-empty sampleInfo
+    expect_equal(unname(.checkOverwrite(tmp_data, assay.names)),
+                 c(FALSE, FALSE, FALSE, TRUE, TRUE))
+
+    # Non-empty assay
+    logfc(tmp_data) <- matrix(1, nrow = nrow(tmp_data), ncol = ncol(tmp_data))
+    expect_equal(unname(.checkOverwrite(tmp_data, assay.names)),
+                 c(FALSE, TRUE, FALSE, TRUE, TRUE))
+
+    # No problems
+    tmp_data$c <- tmp_data$pi <- NULL
+    logfc(tmp_data) <- matrix(NA, nrow = nrow(tmp_data), ncol = ncol(tmp_data))
+    expect_equal(unname(.checkOverwrite(tmp_data, assay.names)),
+                 c(FALSE, FALSE, FALSE, FALSE, FALSE))
+})
+
 test_that("Parallelization paramers are correctly tidied", {
 
     ## Convert vector to list

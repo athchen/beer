@@ -1,5 +1,5 @@
 .beadsRR_beer <- function(object, prior.params, beads.args, se.matrix,
-                          jags.params, sample.dir, parallel, paralle.params){
+                          jags.params, sample.dir){
     for(sample in colnames(object)){
         if(!jags.params$quiet) {
             print(paste0(which(colnames(object) == sample), " of ", ncol(object)))

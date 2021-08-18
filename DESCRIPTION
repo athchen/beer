@@ -22,6 +22,7 @@ Imports:
     edgeR
 Suggests: 
     testthat (>= 3.0.0),
+    cli,
     covr,
     knitr,
     rmarkdown

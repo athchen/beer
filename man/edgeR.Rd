@@ -9,7 +9,7 @@ edgeR(
   threshold.cpm = 0,
   threshold.prevalence = 0,
   assay.names = c(logfc = "logfc", prob = "prob"),
-  parallel = list(strategy = "sequential"),
+  parallel = "sequential",
   beadsRR = FALSE
 )
 }
@@ -21,11 +21,12 @@ edgeR(
 \item{threshold.prevalence}{proportion of beads-only samples that surpass
 \code{threshold.cpm}.}
 
-\item{assay.names}{named vector specifying the assay names for the log2(fold-change) and exact test p-values. The vector must have entries for `logfc` and
-`prob`.}
+\item{assay.names}{named vector specifying the assay names for the log2(fold-change) and exact test p-values. If the vector is not names, the first and
+second entries are used as defaults}
 
-\item{parallel}{list of parameters specifying the parallelization strategy
-as described in \code{\link{future::plan}{future::plan()}}.}
+\item{parallel}{character indicating which parallelization strategy to use.
+Alternatively, a named list of parameters available in
+\code{\link{future::plan}{future::plan()}}.}
 
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
@@ -45,7 +46,7 @@ edgeR(sim_data)
 
 ## Multisession evaluation
 \dontrun{
-edgeR(sim_data, parallel = list(strategy = "multisession"))
+edgeR(sim_data, parallel = "multisession")
 }
 
 }

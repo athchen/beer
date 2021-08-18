@@ -89,11 +89,11 @@ summarizeRun <- function(object, directory, se.matrix,
     names(jags_files) <- samples
 
     ## Pre-allocate containers
-    point_c <- if(assay.names["c"] %in% names(metadata(object))) {
-        metadata(object)[[assay.names["c"]]]
+    point_c <- if(assay.names["c"] %in% colnames(sampleInfo(object))) {
+        sampleInfo(object)[[assay.names["c"]]]
     } else rep(NA, ncol(object))
-    point_pi <- if(assay.names["pi"] %in% names(metadata(object))) {
-        metadata(object)[[assay.names["pi"]]]
+    point_pi <- if(assay.names["pi"] %in% colnames(sampleInfo(object))) {
+        sampleInfo(object)[[assay.names["pi"]]]
     } else rep(NA, ncol(object))
     point_phi <- if(!is.null(assay.names["phi"]) &
                     assay.names["phi"] %in% assayNames(object)){
@@ -139,10 +139,9 @@ summarizeRun <- function(object, directory, se.matrix,
         point_Z[, sample] <- out$point_Z$est_value
      }
 
-    ## Assign c and pi to metadata
-    add <- !vapply(assay.names[c("c", "pi")], is.na, logical(1))
-    metadata(object) <- c(metadata(object),
-                          list(c = point_c, pi = point_pi)[add])
+    ## Assign c and pi to sampleInfo
+    if(!is.na(assay.names["c"])) object$c <- point_c
+    if(!is.na(assay.names["pi"])) object$pi <- point_pi
 
     ## Assign phi, phi_Z, and Z to assays
     assay <- c("phi", "phi_Z", "Z")[!is.na(assay.names[c("phi", "phi_Z", "Z")])]
