@@ -68,7 +68,7 @@ summarizeRun_one <- function(object, file, se.matrix,
 #' the MCMC sampler are mapped back to the original peptide names.
 #'
 #' @param object a \code{\link[PhIPData]{PhIPData}} object
-#' @param directory path of the directory containing JAGS output
+#' @param jags.files list of files containing MCMC sampling results
 #' @param se.matrix logical matrix indicating which peptides were identified as
 #' super-enriched peptides
 #' @param burn.in number of iterations to be burned
@@ -77,16 +77,24 @@ summarizeRun_one <- function(object, file, se.matrix,
 #'
 #' @return PhIPData object with point estimates stored in the assays specified
 #' by `assay.names`.
-summarizeRun <- function(object, directory, se.matrix,
+#'
+#' @importFrom progressr handlers progress
+summarizeRun <- function(object, jags.files, se.matrix,
                          burn.in = 0, post.thin = 1,
                          assay.names, quiet = FALSE){
 
-    jags_files <- list.files(directory, full.names = TRUE)
+    ## Check that all files are present
+    if(!all(file.exists(jags.files))){
+        stop(paste0("Cannot find the following files: ",
+                    paste0(jags.files[!file.exists(jags.files)],
+                           collapse = ", ")))
+    }
+
     samples <- vapply(
-        regmatches(jags_files, regexec("/([^/]*)\\.rds", jags_files)),
+        regmatches(jags.files, regexec("/([^/]*)\\.rds", jags.files)),
         function(x) x[[2]],
         character(1))
-    names(jags_files) <- samples
+    names(jags.files) <- samples
 
     ## Pre-allocate containers
     point_c <- if(assay.names["c"] %in% colnames(sampleInfo(object))) {
@@ -121,10 +129,10 @@ summarizeRun <- function(object, directory, se.matrix,
     ## Summarize each file, use future_lapply here to enable reading/import
     ## to be parallelized
     progressr::handlers("txtprogressbar")
-    p <- progressr::progressor(along = jags_files)
-    files_out <- future_lapply(jags_files, function(file){
-        file_counter <- paste0(which(file == jags_files), " of ",
-                               length(jags_files))
+    p <- progressr::progressor(along = jags.files)
+    files_out <- future_lapply(jags.files, function(file){
+        file_counter <- paste0(which(file == jags.files), " of ",
+                               length(jags.files))
         p(file_counter, class = "sticky", amount = 1)
         summarizeRun_one(object, file, se.matrix, burn.in, post.thin)
     })
