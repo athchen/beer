@@ -21,8 +21,9 @@ edgeR(
 \item{threshold.prevalence}{proportion of beads-only samples that surpass
 \code{threshold.cpm}.}
 
-\item{assay.names}{named vector specifying the assay names for the log2(fold-change) and exact test p-values. If the vector is not names, the first and
-second entries are used as defaults}
+\item{assay.names}{named vector specifying the assay names for the
+log2(fold-change) and exact test p-values. If the vector is not names, the
+first and second entries are used as defaults}
 
 \item{parallel}{character indicating which parallelization strategy to use.
 Alternatively, a named list of parameters available in

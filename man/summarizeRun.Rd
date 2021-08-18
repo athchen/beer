@@ -6,7 +6,7 @@
 \usage{
 summarizeRun(
   object,
-  directory,
+  jags.files,
   se.matrix,
   burn.in = 0,
   post.thin = 1,
@@ -17,7 +17,7 @@ summarizeRun(
 \arguments{
 \item{object}{a \code{\link[PhIPData]{PhIPData}} object}
 
-\item{directory}{path of the directory containing JAGS output}
+\item{jags.files}{list of files containing MCMC sampling results}
 
 \item{se.matrix}{logical matrix indicating which peptides were identified as
 super-enriched peptides}

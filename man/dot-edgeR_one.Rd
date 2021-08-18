@@ -19,6 +19,9 @@
 
 \item{tagwise.dsip}{edgeR estimated tagwise dispersion parameter}
 }
+\value{
+list with sample name, log2 fc estimate, and log10 p-value
+}
 \description{
 Run edgeR for one sample against all the beads-only samples.
 }
