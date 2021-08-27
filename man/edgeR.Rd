@@ -27,7 +27,7 @@ first and second entries are used as defaults}
 
 \item{parallel}{character indicating which parallelization strategy to use.
 Alternatively, a named list of parameters available in
-\code{\link{future::plan}{future::plan()}}.}
+\code{[future::plan]}.}
 
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
@@ -52,7 +52,5 @@ edgeR(sim_data, parallel = "multisession")
 
 }
 \seealso{
-\code{\link[future]{plan}}
-
-\code{\link{beadsRR}}
+\code{[future::plan]}, \code{\link{beadsRR}}
 }

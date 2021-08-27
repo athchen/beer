@@ -8,6 +8,8 @@
 #'
 #' @return logical matrix of the with the same dimensions as \code{object}
 #' indicating which peptides are considered super-enriched.
+#'
+#' @import PhIPData SummarizedExperiment
 .guessEnriched_edgeR <- function(object, threshold = 15, fc.name = "logfc"){
 
     ## Check that assay is present
@@ -33,6 +35,9 @@
 #'
 #' @return logical matrix of the with the same dimensions as \code{object}
 #' indicating which peptides are considered super-enriched.
+#'
+#' @import PhIPData
+#' @importFrom stats coef lm
 .guessEnriched_MLE <- function(object, threshold = 15, beads.prior){
 
     n <- librarySize(object)
@@ -75,7 +80,7 @@
 #' details below.
 #'
 #' @details \strong{edgeR}. Identification of clearly enriched peptides relies
-#' on edgeR fold-change estimates, so \code{\link[beer]{edgeR}} must be run on
+#' on edgeR fold-change estimates, so \code{\link{edgeR}} must be run on
 #' the \code{\link[PhIPData]{PhIPData}} object beforehand. Additional parameters
 #' for identifying clearly enriched peptides based on edgeR estimated
 #' fold-changes are listed below:

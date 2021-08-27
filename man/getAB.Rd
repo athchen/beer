@@ -57,12 +57,12 @@ sample mean and variance to shape parameters of the beta distribution. For
     and/or variance are zero.
     \item \code{lower}: lowerbound for the shape parameters.
     \item \code{upper}: upper bound for the shape parameters.
-    \item \code{...}: parameters passed to \code{\link[base]{mean}} and
-    \code{\link[base]{var}}.
+    \item \code{...}: parameters passed to \code{[base::mean]} and
+    \code{[stats::var]}.
 }
 
 \strong{Maximum Likelihood (MLE)} estimates rely on
-\code{\link[stats]{optim}} to derive shape parameters that maximize the
+\code{[stats::optim]} to derive shape parameters that maximize the
 likelihood of observed data. By default the L-BFGS-B optimization method is
 used. Parameters for MLE estimates include:
 
@@ -70,7 +70,7 @@ used. Parameters for MLE estimates include:
      \item \code{prop.offset}: offset to use when the proportion of reads
      is 0.
      \item \code{optim.method}: optimization method passed to
-     \code{\link[stats]{optim}}.
+     \code{[stats::optim]}.
      \item \code{lower}: lowerbound for the shape parameters.
      \item \code{upper}: upper bound for the shape parameters.
 }
@@ -81,7 +81,7 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 getAB(sim_data, method = "edgeR")
 getAB(sim_data, method = "mle")
-getAB(sim_Data, method = "mom")
+getAB(sim_data, method = "mom")
 
 ## Vector of proportions
 prop <- rbeta(100, 2, 8)

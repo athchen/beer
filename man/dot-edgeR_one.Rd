@@ -15,9 +15,9 @@
 
 \item{common.disp}{edgeR estimated common disperion parameter}
 
-\item{trended.disp}{edgeR estimated trended dispersion parameter}
+\item{tagwise.disp}{edgeR estimated tagwise dispersion parameter}
 
-\item{tagwise.dsip}{edgeR estimated tagwise dispersion parameter}
+\item{trended.disp}{edgeR estimated trended dispersion parameter}
 }
 \value{
 list with sample name, log2 fc estimate, and log10 p-value

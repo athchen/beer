@@ -22,6 +22,8 @@ Depends:
     PhIPData (>= 1.1.1), 
     rjags
 Imports:
+    methods, 
+    SummarizedExperiment, 
     edgeR,
     cli,
     future, 
@@ -32,7 +34,9 @@ Suggests:
     BiocStyle, 
     covr,
     knitr,
-    rmarkdown
+    rmarkdown, 
+    dplyr, 
+    ggplot2
 biocViews: Software, StatisticalMethod, Bayesian
 BugReports: https://github.com/athchen/beer/issues
 Collate:

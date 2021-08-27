@@ -42,7 +42,7 @@ for additional details on each of these parameters.
 
 If run as part of \code{\link{brew}} or \code{\link{edgeR}}, then
 parallelization is set by \code{parallel}. Otherwise the parallelization
-must be set before running \code{beadsRR} using \code{\link[future]{plan}}.
+must be set before running \code{beadsRR} using \code{[future::plan]}.
 }
 \examples{
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
@@ -53,5 +53,5 @@ beadsRR(sim_data, method = "edgeR")
 }
 \seealso{
 \code{\link{brew}} for BEER parameters, \code{\link{edgeR}} for
-edgeR parameters, and \code{\link[future]{plan}} for parallization.
+edgeR parameters, and \code{[future::plan]} for parallization.
 }

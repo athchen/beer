@@ -61,6 +61,6 @@ test_that("Parallelization paramers are correctly tidied", {
     parallel[["workers"]] <- max_workers + 4
     expect_equal(.tidyParallel(parallel)[["workers"]], max_workers)
     parallel[["workers"]] <- 2
-    expect_equal(.tidyParallel(parallel)[["workers"]], 2)
+    expect_equal(.tidyParallel(parallel)[["workers"]], min(2, max_workers))
 
 })

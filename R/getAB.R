@@ -52,9 +52,10 @@
 #' variance are zero.
 #' @param lower lowerbound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
-#' @param ... parameters passed to \code{\link[base]{mean}} and
-#' \code{\link[base]{var}}.
+#' @param ... parameters passed to \code{[base::mean]} and
+#' \code{[stats::var]}.
 #'
+#' @importFrom stats var
 #' @return a data frame with MOM estimates of a, b
 .getAB_MOM_prop <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
                             lower = 1, upper = Inf, ...){
@@ -97,8 +98,8 @@
 #' variance are zero.
 #' @param lower lowerbound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
-#' @param ... parameters passed to \code{\link[base]{mean}} and
-#' \code{\link[base]{var}}.
+#' @param ... parameters passed to \code{[base::mean]} and
+#' \code{[stats::var]}.
 #'
 #' @return a data frame with MOM estimates of a, b
 .getAB_MOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
@@ -116,13 +117,16 @@
 #'
 #' @param prop vector of proportions.
 #' @param prop.offset offset to use when the proportion of reads is 0.
-#' @param optim.method optimization method passed to \code{\link[stats]{optim}}.
+#' @param optim.method optimization method passed to \code{[stats::optim]}.
 #' @param lower lowerbound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
 #'
 #' @return a data frame of MLE estimates of a, b
 #'
-#' @seealso \code{\link[stats]{optim}} for available optimization methods
+#' @seealso \code{[stats::optim]} for available optimization methods
+#'
+#' @import PhIPData
+#' @importFrom stats dbeta optim
 .getAB_MLE_prop <- function(prop, prop.offset = 1e-8, optim.method = "default",
                        lower = 1, upper = Inf){
 
@@ -155,13 +159,13 @@
 #'
 #' @param object a \code{\link[PhIPData]{PhIPData}} object
 #' @param prop.offset offset to use when the proportion of reads is 0.
-#' @param optim.method optimization method passed to \code{\link[stats]{optim}}.
+#' @param optim.method optimization method passed to \code{[stats::optim]}.
 #' @param lower lowerbound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
 #'
 #' @return a data frame of MLE estimates of a, b
 #'
-#' @seealso \code{\link[stats]{optim}} for available optimization methods
+#' @seealso \code{[stats::optim]} for available optimization methods
 .getAB_MLE <- function(object, prop.offset = 1e-8, optim.method = "default",
                       lower = 1, upper = Inf){
 
@@ -211,12 +215,12 @@
 #'     and/or variance are zero.
 #'     \item \code{lower}: lowerbound for the shape parameters.
 #'     \item \code{upper}: upper bound for the shape parameters.
-#'     \item \code{...}: parameters passed to \code{\link[base]{mean}} and
-#'     \code{\link[base]{var}}.
+#'     \item \code{...}: parameters passed to \code{[base::mean]} and
+#'     \code{[stats::var]}.
 #' }
 #'
 #' \strong{Maximum Likelihood (MLE)} estimates rely on
-#' \code{\link[stats]{optim}} to derive shape parameters that maximize the
+#' \code{[stats::optim]} to derive shape parameters that maximize the
 #' likelihood of observed data. By default the L-BFGS-B optimization method is
 #' used. Parameters for MLE estimates include:
 #'
@@ -224,7 +228,7 @@
 #'      \item \code{prop.offset}: offset to use when the proportion of reads
 #'      is 0.
 #'      \item \code{optim.method}: optimization method passed to
-#'      \code{\link[stats]{optim}}.
+#'      \code{[stats::optim]}.
 #'      \item \code{lower}: lowerbound for the shape parameters.
 #'      \item \code{upper}: upper bound for the shape parameters.
 #' }
@@ -245,13 +249,14 @@
 #'
 #' getAB(sim_data, method = "edgeR")
 #' getAB(sim_data, method = "mle")
-#' getAB(sim_Data, method = "mom")
+#' getAB(sim_data, method = "mom")
 #'
 #' ## Vector of proportions
 #' prop <- rbeta(100, 2, 8)
 #' getAB(prop, method = "mle")
 #' getAB(prop, method = "mom")
 #'
+#' @importFrom methods is
 #' @export
 getAB <- function(object, method = "mom", ...){
 
@@ -269,7 +274,7 @@ getAB <- function(object, method = "mom", ...){
         }
 
         if (method == "mle"){ .getAB_MLE_prop(object, ...)
-        } else if (method == "mom") { .getAB_MOM_prop(object, ....)
+        } else if (method == "mom") { .getAB_MOM_prop(object, ...)
         } else stop("edgeR is not a valid method for vectors.")
     } else if (is(object, "PhIPData")){
         if(method == "mom"){ .getAB_MOM(object, ...)

@@ -26,6 +26,8 @@
 #'
 #' @seealso \emph{Appendix} in the Chen et. al 2022
 #'
+#' @import PhIPData
+#' @importFrom stats coef lm
 #' @export
 guessInits <- function(object, beads.prior){
     ## Extract convenient parameters

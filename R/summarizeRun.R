@@ -79,9 +79,10 @@ summarizeRun_one <- function(object, file, se.matrix,
 #' by `assay.names`.
 #'
 #' @importFrom progressr handlers progress
+#' @import PhIPData SummarizedExperiment
 summarizeRun <- function(object, jags.files, se.matrix,
                          burn.in = 0, post.thin = 1,
-                         assay.names, quiet = FALSE){
+                         assay.names){
 
     ## Check that all files are present
     if(!all(file.exists(jags.files))){

@@ -17,7 +17,7 @@
 
 \item{prop.offset}{offset to use when the proportion of reads is 0.}
 
-\item{optim.method}{optimization method passed to \code{\link[stats]{optim}}.}
+\item{optim.method}{optimization method passed to \code{[stats::optim]}.}
 
 \item{lower}{lowerbound for the shape parameters.}
 
@@ -30,5 +30,5 @@ a data frame of MLE estimates of a, b
 Helper function to derive MLE estimates of a, b from a vector of proportions
 }
 \seealso{
-\code{\link[stats]{optim}} for available optimization methods
+\code{[stats::optim]} for available optimization methods
 }

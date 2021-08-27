@@ -9,7 +9,7 @@
 #' prior parameters (a_0, b_0)
 #' @param jags.params named list of parameters for running MCMC using JAGS
 #' @param sample.dir path to temporarily store RDS files for each sample run,
-#' if \code{NULL} then \code{\link[base]{tmpdir}} is used to temporarily store
+#' if \code{NULL} then \code{[base::tempdir]} is used to temporarily store
 #' MCMC output and cleaned afterwards.
 #' @param assay.names named vector indicating where MCMC results should be
 #' stored in the PhIPData object
@@ -17,6 +17,7 @@
 #'
 #' @return vector of process IDs or a PhIPData object
 #'
+#' @import PhIPData
 #' @importFrom future.apply future_lapply
 #' @importFrom progressr handlers progressor
 .beadsRR_beer <- function(object,
@@ -103,7 +104,7 @@
                             dimnames = dimnames(object)),
                      burn.in = jags.params$burn.in,
                      post.thin = jags.params$post.thin,
-                     assay.names, quiet = FALSE)
+                     assay.names)
 
         ## Clean-up after summarization
         if(is.null(sample.dir)){
@@ -129,6 +130,8 @@
 #' the first and second entries are used as defaults
 #'
 #' @return vector of process IDs
+#'
+#' @import PhIPData SummarizedExperiment
 #' @importFrom future.apply future_lapply
 .beadsRR_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                            assay.names = c(logfc = "logfc", prob = "prob")){
@@ -202,7 +205,7 @@
 #'
 #' If run as part of \code{\link{brew}} or \code{\link{edgeR}}, then
 #' parallelization is set by \code{parallel}. Otherwise the parallelization
-#' must be set before running \code{beadsRR} using \code{\link[future]{plan}}.
+#' must be set before running \code{beadsRR} using \code{[future::plan]}.
 #'
 #' @param object PhIPData object
 #' @param method one of \code{'beer'} or \code{'edgeR'} specifying which method
@@ -213,7 +216,7 @@
 #' @return a PhIPData object
 #'
 #' @seealso \code{\link{brew}} for BEER parameters, \code{\link{edgeR}} for
-#' edgeR parameters, and \code{\link[future]{plan}} for parallization.
+#' edgeR parameters, and \code{[future::plan]} for parallization.
 #'
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))

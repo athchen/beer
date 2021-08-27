@@ -33,7 +33,7 @@ enriched peptides}
 \item{jags.params}{named list of parameters for running MCMC using JAGS}
 
 \item{sample.dir}{path to temporarily store RDS files for each sample run,
-if \code{NULL} then \code{\link[base]{tmpdir}} is used to temporarily store
+if \code{NULL} then \code{[base::tempdir]} is used to temporarily store
 MCMC output and cleaned afterwards.}
 
 \item{assay.names}{named vector indicating where MCMC results should be
@@ -44,7 +44,7 @@ should be compared to all other beads-only samples.}
 
 \item{parallel}{character indicating which parallelization strategy to use.
 Alternatively, a named list of parameters available in
-\code{\link{future::plan}{future::plan()}}.}
+\code{[future::plan]}.}
 }
 \value{
 A PhIPData object with BEER results stored in the locations specified
@@ -79,13 +79,13 @@ include,
 }
 
 \strong{\code{beads.args}}. Named list of parameters supplied to
-\code{\link[beer]{getAB}}. The estimation method used is specified in
+\code{\link{getAB}}. The estimation method used is specified in
 \code{prior.params}, but other valid parameters include lower and upper
 bounds for elicited parameters. As JAGS recommends that \eqn{a, b > 1} for
 the beta distribution, \code{beads.args} defaults to \code{list(lower = 1)}.
 
 \strong{\code{se.params}}. Named list of parameters supplied to
-\code{\link[beer]{guessEnriched}}. By default \code{list(method = 'mle')} is
+\code{\link{guessEnriched}}. By default \code{list(method = 'mle')} is
 used to identify clearly enriched peptides.
 
 \strong{\code{jags.params}}. Named list of parameters for MCMC sampling. By
@@ -128,10 +128,10 @@ beer(sim_data, parallel = "multisession")
 
 }
 \seealso{
-\code{\link[future]{plan}} for parallelization options,
+\code{[future::plan]} for parallelization options,
 \code{\link{beadsRR}} for running each beads-only sample against all
 remaining samples, \code{\link{getAB}} for more information about valid parameters for estimating beads-only prior parameters,
 \code{\link{guessEnriched}} for more information about how clearly
-enriched peptides are identified, and \code{\link[rjags]{jags.model}} for
+enriched peptides are identified, and \code{[rjags::jags.model]} for
 MCMC sampling parameters.
 }

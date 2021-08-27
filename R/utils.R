@@ -1,7 +1,10 @@
 #' Function to check that the counts matrix only contains integers
 #'
 #' @param object PhIPData object
+#'
 #' @return nothing if all counts are integers, and error otherwise
+#'
+#' @import PhIPData
 .checkCounts <- function(object){
     is_int <- vapply(PhIPData::counts(object), is.integer, logical(1))
     if(!all(is_int)){
@@ -19,6 +22,8 @@
 #'
 #' @return logical vector indicating whether data in an assay will be
 #' overwritten
+#'
+#' @import PhIPData SummarizedExperiment
 .checkOverwrite <- function(object, assay.names){
     ## check sampleInfo objects
     in_sample <- ifelse(assay.names == "sampleInfo",
@@ -36,12 +41,12 @@
 #' Function to tidy inputs pertaining to parallelization
 #'
 #' This function ensures that the specified plan is in the list of valid
-#' plans for \code{\link{future::plan}{future}}. The function also ensures that
+#' plans for \code{[future::plan]}. The function also ensures that
 #' the maximum number of workers is one less that number of available number
 #' of cpus.
 #'
 #' @param parallel list of parameters passed to the
-#' \code{\link{future::plan}{future::plan()}} function.
+#' \code{[future::plan]} function.
 #'
 #' @importFrom future availableCores
 .tidyParallel <- function(parallel){

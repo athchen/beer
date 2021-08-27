@@ -11,6 +11,8 @@ NULL
 #' @param beads.args parameters used to estimate a_0, b_0
 #'
 #' @return tidied list of prior parameters.
+#'
+#' @import PhIPData
 .tidyInputsPrior <- function(prior.params, object, beads.args){
     params <- c("method", "a_0", "b_0", "a_pi", "b_pi",
                 "a_phi", "b_phi", "a_c", "b_c", "fc")
@@ -168,8 +170,6 @@ NULL
 #' @param prior.params vector of prior parameters
 #' @param n.chains number of chains to run
 #' @param n.adapt number of iterations to use as burn-in.
-#' @param quiet logical value specifying whether warnings/informative messages
-#' should be printed
 #' @param n.iter number of iterations for the MCMC chain to run (after n.adapt)
 #' @param thin thinning parameter
 #' @param na.rm what to do with NA values (for JAGS)
@@ -193,6 +193,9 @@ NULL
 #' }
 #'
 #' @export
+#' @import PhIPData
+#' @importFrom rjags coda.samples
+#' @importFrom utils capture.output
 .brew_one <- function(object, sample, prior.params,
                      n.chains = 1, n.adapt = 1e3,
                      n.iter = 1e4, thin = 1, na.rm = TRUE, ...,
@@ -242,11 +245,15 @@ NULL
 #' @param se.matrix matrix indicating which peptides are clearly enriched
 #' @param prior.params list of prior parameters
 #' @param beads.prior data frame of beads-only prior parameters
+#' @param beads.args named list of parameters supplied to estimating beads-only
+#' prior parameters (a_0, b_0)
 #' @param jags.params list of JAGS parameters
 #' @param tmp.dir directory to store JAGS samples
 #'
 #' @return vector of process id's for internal checking of whether functions
 #' were parallized correctly.
+#'
+#' @import PhIPData
 .brew_samples <- function(object, sample_id, beads_id, se.matrix,
                           prior.params, beads.prior, beads.args, jags.params,
                           tmp.dir){
@@ -318,13 +325,13 @@ NULL
 #' }
 #'
 #' \strong{\code{beads.args}}. Named list of parameters supplied to
-#' \code{\link[beer]{getAB}}. The estimation method used is specified in
+#' \code{\link{getAB}}. The estimation method used is specified in
 #' \code{prior.params}, but other valid parameters include lower and upper
 #' bounds for elicited parameters. As JAGS recommends that \eqn{a, b > 1} for
 #' the beta distribution, \code{beads.args} defaults to \code{list(lower = 1)}.
 #'
 #' \strong{\code{se.params}}. Named list of parameters supplied to
-#' \code{\link[beer]{guessEnriched}}. By default \code{list(method = 'mle')} is
+#' \code{\link{guessEnriched}}. By default \code{list(method = 'mle')} is
 #' used to identify clearly enriched peptides.
 #'
 #' \strong{\code{jags.params}}. Named list of parameters for MCMC sampling. By
@@ -362,7 +369,7 @@ NULL
 #' enriched peptides
 #' @param jags.params named list of parameters for running MCMC using JAGS
 #' @param sample.dir path to temporarily store RDS files for each sample run,
-#' if \code{NULL} then \code{\link[base]{tmpdir}} is used to temporarily store
+#' if \code{NULL} then \code{[base::tempdir]} is used to temporarily store
 #' MCMC output and cleaned afterwards.
 #' @param assay.names named vector indicating where MCMC results should be
 #' stored in the PhIPData object
@@ -370,16 +377,16 @@ NULL
 #' should be compared to all other beads-only samples.
 #' @param parallel character indicating which parallelization strategy to use.
 #' Alternatively, a named list of parameters available in
-#' \code{\link{future::plan}{future::plan()}}.
+#' \code{[future::plan]}.
 #'
 #' @return A PhIPData object with BEER results stored in the locations specified
 #' by \code{assay.names}.
 #'
-#' @seealso \code{\link[future]{plan}} for parallelization options,
+#' @seealso \code{[future::plan]} for parallelization options,
 #' \code{\link{beadsRR}} for running each beads-only sample against all
 #' remaining samples, \code{\link{getAB}} for more information about valid parameters for estimating beads-only prior parameters,
 #' \code{\link{guessEnriched}} for more information about how clearly
-#' enriched peptides are identified, and \code{\link[rjags]{jags.model}} for
+#' enriched peptides are identified, and \code{[rjags::jags.model]} for
 #' MCMC sampling parameters.
 #'
 #' @examples
@@ -396,6 +403,7 @@ NULL
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
 #' @importFrom cli cli_alert_warning
+#' @import PhIPData
 #'
 #' @export
 brew <- function(object,
@@ -501,7 +509,7 @@ brew <- function(object,
                             se.matrix,
                             burn.in = jags.params$burn.in,
                             post.thin = jags.params$post.thin,
-                            assay.names, quiet = FALSE)
+                            assay.names)
 
     ## Clean-up if necessary
     if(is.null(sample.dir)){

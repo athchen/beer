@@ -15,6 +15,7 @@
 #' estimates
 #'
 #' @importFrom edgeR calcNormFactors
+#' @importFrom methods as
 .edgeRBeads <- function(object, threshold.cpm = 0, threshold.prevalence = 0){
     edgeR_beads <- as(PhIPData::subsetBeads(object), "DGEList")
 
@@ -37,12 +38,14 @@
 #' @param sample sample name of the sample to compare against beads-only samples
 #' @param beads sample names for beads-only samples
 #' @param common.disp edgeR estimated common disperion parameter
-#' @param tagwise.dsip edgeR estimated tagwise dispersion parameter
+#' @param tagwise.disp edgeR estimated tagwise dispersion parameter
 #' @param trended.disp edgeR estimated trended dispersion parameter
 #'
 #' @return list with sample name, log2 fc estimate, and log10 p-value
 #'
 #' @importFrom edgeR exactTest
+#' @importFrom methods as
+#' @import PhIPData
 .edgeR_one <- function(object, sample, beads,
                        common.disp, tagwise.disp, trended.disp){
     ## Coerce into edgeR object
@@ -75,15 +78,14 @@
 #' first and second entries are used as defaults
 #' @param parallel character indicating which parallelization strategy to use.
 #' Alternatively, a named list of parameters available in
-#' \code{\link{future::plan}{future::plan()}}.
+#' \code{[future::plan]}.
 #' @param beadsRR logical value specifying whether each beads-only sample
 #' should be compared to all other beads-only samples.
 #'
 #' @return PhIPData object with log2 estimated fold-changes and p-values for
 #' enrichment stored in the assays specified by `assay.names`.
 #'
-#' @seealso \code{\link[future]{plan}}
-#' @seealso \code{\link{beadsRR}}
+#' @seealso \code{[future::plan]}, \code{\link{beadsRR}}
 #'
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
@@ -99,6 +101,7 @@
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
 #' @importFrom cli cli_alert_warning
+#' @import PhIPData SummarizedExperiment
 #' @export
 edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
                   assay.names = c(logfc = "logfc", prob = "prob"),

@@ -22,8 +22,8 @@ variance are zero.}
 
 \item{upper}{upper bound for the shape parameters.}
 
-\item{...}{parameters passed to \code{\link[base]{mean}} and
-\code{\link[base]{var}}.}
+\item{...}{parameters passed to \code{[base::mean]} and
+\code{[stats::var]}.}
 }
 \value{
 a data frame with MOM estimates of a, b

@@ -8,11 +8,11 @@
 }
 \arguments{
 \item{parallel}{list of parameters passed to the
-\code{\link{future::plan}{future::plan()}} function.}
+\code{[future::plan]} function.}
 }
 \description{
 This function ensures that the specified plan is in the list of valid
-plans for \code{\link{future::plan}{future}}. The function also ensures that
+plans for \code{[future::plan]}. The function also ensures that
 the maximum number of workers is one less that number of available number
 of cpus.
 }

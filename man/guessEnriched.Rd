@@ -29,7 +29,7 @@ details below.
 }
 \details{
 \strong{edgeR}. Identification of clearly enriched peptides relies
-on edgeR fold-change estimates, so \code{\link[beer]{edgeR}} must be run on
+on edgeR fold-change estimates, so \code{\link{edgeR}} must be run on
 the \code{\link[PhIPData]{PhIPData}} object beforehand. Additional parameters
 for identifying clearly enriched peptides based on edgeR estimated
 fold-changes are listed below:

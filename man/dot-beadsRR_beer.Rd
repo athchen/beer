@@ -28,7 +28,7 @@ prior parameters (a_0, b_0)}
 \item{jags.params}{named list of parameters for running MCMC using JAGS}
 
 \item{sample.dir}{path to temporarily store RDS files for each sample run,
-if \code{NULL} then \code{\link[base]{tmpdir}} is used to temporarily store
+if \code{NULL} then \code{[base::tempdir]} is used to temporarily store
 MCMC output and cleaned afterwards.}
 
 \item{assay.names}{named vector indicating where MCMC results should be

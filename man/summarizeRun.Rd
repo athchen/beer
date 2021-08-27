@@ -10,8 +10,7 @@ summarizeRun(
   se.matrix,
   burn.in = 0,
   post.thin = 1,
-  assay.names,
-  quiet = FALSE
+  assay.names
 )
 }
 \arguments{

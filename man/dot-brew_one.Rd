@@ -37,9 +37,6 @@
 \item{...}{extra params for JAGS}
 
 \item{seed}{number/string for reproducibility purposes.}
-
-\item{quiet}{logical value specifying whether warnings/informative messages
-should be printed}
 }
 \value{
 nothing, saves the the results to an RDS in either a temp directory

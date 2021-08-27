@@ -29,6 +29,9 @@
 
 \item{beads.prior}{data frame of beads-only prior parameters}
 
+\item{beads.args}{named list of parameters supplied to estimating beads-only
+prior parameters (a_0, b_0)}
+
 \item{jags.params}{list of JAGS parameters}
 
 \item{tmp.dir}{directory to store JAGS samples}
