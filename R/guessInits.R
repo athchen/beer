@@ -1,8 +1,8 @@
 #' @title Derive initial estimates of unknown model parameters
 #'
-#' @description To reduce converge time and to reduce the likelihood of the slice sampler
-#' getting stick, we use maximum likelihood to derive initial estimates for
-#' unknown model parameters.
+#' @description To reduce converge time and to reduce the likelihood of the
+#' slice sampler getting stuck, we use maximum likelihood to derive initial
+#' estimates for unknown model parameters.
 #'
 #' @details Briefly initial values are defined as follows:
 #' \enumerate{
@@ -28,8 +28,7 @@
 #'
 #' @import PhIPData
 #' @importFrom stats coef lm
-#' @export
-guessInits <- function(object, beads.prior){
+guessInits <- function(object, beads.prior) {
     ## Extract convenient parameters
     N <- ncol(object)
     P <- nrow(object)
@@ -41,34 +40,42 @@ guessInits <- function(object, beads.prior){
     b_0 <- beads.prior[["b_0"]]
 
     # Guess proportions, add offset of 1e-8 when theta is 0
-    theta_guess <- Y/matrix(rep(n, P), nrow = P, byrow = TRUE)
-    theta_guess <- theta_guess + 1e-8*(theta_guess == 0)
+    theta_guess <- Y / matrix(rep(n, P), nrow = P, byrow = TRUE)
+    theta_guess <- theta_guess + 1e-8 * (theta_guess == 0)
 
     ## Guess enriched peptides
-    expected_prop <- a_0/(a_0 + b_0)
-    expected_rc <- vapply(n, function(n_i) n_i*expected_prop,
-                          numeric(length(expected_prop)))
-    Z_guess <- (Y > expected_rc*2)*
+    expected_prop <- a_0 / (a_0 + b_0)
+    expected_rc <- vapply(
+        n, function(n_i) n_i * expected_prop,
+        numeric(length(expected_prop))
+    )
+    Z_guess <- (Y > expected_rc * 2) *
         (1 - matrix(rep(B, P), nrow = P, byrow = TRUE))
 
     ## Guess proportions of enriched peptides
     pi_guess <- colMeans(Z_guess)
 
     ## Guess attenuation constant
-    c_guess <- sapply(seq(N), function(index){
-        if(B[index] != 1){
+    c_guess <- vapply(seq(N), function(index) {
+        if (B[index] != 1) {
             coef(lm(Y[, index] ~ expected_rc[, index] - 1))
-        } else 1
-    })
+        } else {
+            1
+        }
+    }, numeric(1))
 
     ## Guess fold change
-    expected_rc_attn <- vapply(c_guess*n, function(n_i) n_i*expected_prop,
-                               numeric(length(expected_prop)))
-    phi_guess <- (1-Z_guess) + Y/expected_rc_attn*Z_guess
+    expected_rc_attn <- vapply(
+        c_guess * n, function(n_i) n_i * expected_prop,
+        numeric(length(expected_prop))
+    )
+    phi_guess <- (1 - Z_guess) + Y / expected_rc_attn * Z_guess
 
-    list(theta = theta_guess,
-         c_sample = vapply(c_guess, min, numeric(1), 1-1e-6), # ensure c < 1
-         pi_sample = vapply(pi_guess, max, numeric(1), 1e-6), # ensure pi > 0
-         Z = Z_guess,
-         phi_sample = phi_guess)
+    list(
+        theta = theta_guess,
+        c_sample = vapply(c_guess, min, numeric(1), 1 - 1e-6), # ensure c < 1
+        pi_sample = vapply(pi_guess, max, numeric(1), 1e-6), # ensure pi > 0
+        Z = Z_guess,
+        phi_sample = phi_guess
+    )
 }

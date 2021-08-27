@@ -10,6 +10,9 @@
 \item{parallel}{list of parameters passed to the
 \code{[future::plan]} function.}
 }
+\value{
+tidied list of parameters passed to \code{[future::plan]}
+}
 \description{
 This function ensures that the specified plan is in the list of valid
 plans for \code{[future::plan]}. The function also ensures that

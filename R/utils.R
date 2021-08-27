@@ -5,9 +5,9 @@
 #' @return nothing if all counts are integers, and error otherwise
 #'
 #' @import PhIPData
-.checkCounts <- function(object){
+.checkCounts <- function(object) {
     is_int <- vapply(PhIPData::counts(object), is.integer, logical(1))
-    if(!all(is_int)){
+    if (!all(is_int)) {
         stop("`counts` entries must be integers.")
     }
 }
@@ -24,15 +24,19 @@
 #' overwritten
 #'
 #' @import PhIPData SummarizedExperiment
-.checkOverwrite <- function(object, assay.names){
+.checkOverwrite <- function(object, assay.names) {
     ## check sampleInfo objects
     in_sample <- ifelse(assay.names == "sampleInfo",
-                        names(assay.names) %in% colnames(sampleInfo(object)),
-                        FALSE)
+        names(assay.names) %in% colnames(sampleInfo(object)),
+        FALSE
+    )
 
-    in_assay <- vapply(assay.names, function(name){
-        if(name %in% assayNames(object)) any(!is.na(assay(object, name)))
-        else FALSE
+    in_assay <- vapply(assay.names, function(name) {
+        if (name %in% assayNames(object)) {
+            any(!is.na(assay(object, name)))
+        } else {
+            FALSE
+        }
     }, logical(1))
 
     ifelse(is.na(in_sample | in_assay), FALSE, in_sample | in_assay)
@@ -48,36 +52,48 @@
 #' @param parallel list of parameters passed to the
 #' \code{[future::plan]} function.
 #'
+#' @return tidied list of parameters passed to \code{[future::plan]}
+#'
 #' @importFrom future availableCores
-.tidyParallel <- function(parallel){
-    valid_strat <- c("sequential", "transparent", "multisession",
-                     "multicore", "cluster", "remote")
+.tidyParallel <- function(parallel) {
+    valid_strat <- c(
+        "sequential", "transparent", "multisession",
+        "multicore", "cluster", "remote"
+    )
 
     ## Convert to list if parallel is a character vector
     ## The first entry always defines the plan
-    if(is.vector(parallel)) {
+    if (is.vector(parallel)) {
         strat <- ifelse("strategy" %in% names(parallel),
-                        parallel[["strategy"]],
-                        parallel[1])
-        workers <- if("workers" %in% names(parallel)) { parallel[["workers"]]
-        } else NULL
+            parallel[["strategy"]],
+            parallel[1]
+        )
+        workers <- if ("workers" %in% names(parallel)) {
+            parallel[["workers"]]
+        } else {
+            NULL
+        }
         parallel <- list(strategy = strat, workers = as.numeric(workers))
     }
 
     ## Check that strategy is valid
     if (!all(parallel[["strategy"]] %in% valid_strat)) {
-        stop(paste0("The specified parallel strategy is not supported. ",
-                    "Valid strategies are '",
-                    paste0(valid_strat, collapse = "', '"), "'."))
+        stop(paste0(
+            "The specified parallel strategy is not supported. ",
+            "Valid strategies are '",
+            paste0(valid_strat, collapse = "', '"), "'."
+        ))
     }
 
     ## Get number of workers, ensure that the number of workers is at least one
     ## and less than the number of available cores - 1
-    if(parallel[["strategy"]] == "sequential"){
+    if (parallel[["strategy"]] == "sequential") {
         parallel[["workers"]] <- NULL
     } else {
-        parallel[["workers"]] <- max(1, min(future::availableCores() - 1,
-                                            parallel[["workers"]]))
+        parallel[["workers"]] <- max(1, min(
+            future::availableCores() - 1,
+            parallel[["workers"]]
+        ))
     }
 
     parallel

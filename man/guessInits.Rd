@@ -16,9 +16,9 @@ estimated shape parameters from beads-only samples.}
 a list of estimated initial values.
 }
 \description{
-To reduce converge time and to reduce the likelihood of the slice sampler
-getting stick, we use maximum likelihood to derive initial estimates for
-unknown model parameters.
+To reduce converge time and to reduce the likelihood of the
+slice sampler getting stuck, we use maximum likelihood to derive initial
+estimates for unknown model parameters.
 }
 \details{
 Briefly initial values are defined as follows:

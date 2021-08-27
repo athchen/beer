@@ -67,7 +67,8 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 edgeR_out <- edgeR(sim_data)
 
 guessEnriched(edgeR_out, method = "edgeR", threshold = 15, fc.name = "logfc")
-guessEnriched(edgeR_out, method = "mle", threshold = 15,
-    beads.prior = getAB(edgeR_out, method = "edgeR"))
-
+guessEnriched(edgeR_out,
+    method = "mle", threshold = 15,
+    beads.prior = getAB(edgeR_out, method = "edgeR")
+)
 }

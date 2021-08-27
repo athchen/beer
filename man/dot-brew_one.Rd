@@ -48,16 +48,15 @@ parallelization purposes. For more detailed descriptions see
 \code{\link{brew}}.
 }
 \examples{
-\dontrun{
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 beads_prior <- getAB(subsetBeads(sim_data), "edgeR")
-.brew_one(sim_data, "9", list(a_0 = beads_prior[["a_0"]],
-          b_0 = beads_prior[["b_0"]],
-          a_pi = 2, b_pi = 300,
-          a_phi = 1.25, b_phi = 0.1,
-          a_c = 80, b_c = 20,
-          fc = 1))
-}
-
+.brew_one(sim_data, "9", list(
+    a_0 = beads_prior[["a_0"]],
+    b_0 = beads_prior[["b_0"]],
+    a_pi = 2, b_pi = 300,
+    a_phi = 1.25, b_phi = 0.1,
+    a_c = 80, b_c = 20,
+    fc = 1
+))
 }

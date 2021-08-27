@@ -46,10 +46,7 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 edgeR(sim_data)
 
 ## Multisession evaluation
-\dontrun{
 edgeR(sim_data, parallel = "multisession")
-}
-
 }
 \seealso{
 \code{[future::plan]}, \code{\link{beadsRR}}

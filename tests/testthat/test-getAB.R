@@ -6,8 +6,10 @@ test_that("Valid beta parameter estimates are derived from PhIPData objects", {
     expect_silent(getAB(sim_data, "edgeR"))
 
     # Test invalid method
-    expect_error(getAB(sim_data, "test"),
-                 "Invalid specified method for estimating a, b.")
+    expect_error(
+        getAB(sim_data, "test"),
+        "Invalid specified method for estimating a, b."
+    )
 })
 
 test_that("Valid beta parameter estimates are derived from vectors", {
@@ -17,10 +19,14 @@ test_that("Valid beta parameter estimates are derived from vectors", {
     expect_type(getAB(prop, "mle"), "double")
 
     # Test invalid method
-    expect_error(getAB(prop, "edgeR"),
-                 "edgeR is not a valid method for vectors.")
-    expect_error(getAB(prop, "test"),
-                 "Invalid specified method for estimating a, b.")
+    expect_error(
+        getAB(prop, "edgeR"),
+        "edgeR is not a valid method for vectors."
+    )
+    expect_error(
+        getAB(prop, "test"),
+        "Invalid specified method for estimating a, b."
+    )
 })
 
 test_that("getAB fails for misspecified vectors and incorrect object types", {
@@ -34,6 +40,8 @@ test_that("getAB fails for misspecified vectors and incorrect object types", {
     expect_error(getAB(c("a", "b", "c")), "Invalid inputs. Vectors ")
 
     ## Invalid object type
-    expect_error(getAB(data.frame(x = 1:10, y = -10:-1)),
-                 "Invalid inputs. 'object'")
+    expect_error(
+        getAB(data.frame(x = 1:10, y = -10:-1)),
+        "Invalid inputs. 'object'"
+    )
 })

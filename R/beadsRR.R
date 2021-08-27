@@ -21,24 +21,29 @@
 #' @importFrom future.apply future_lapply
 #' @importFrom progressr handlers progressor
 .beadsRR_beer <- function(object,
-                          prior.params = list(method = "edgeR",
-                                              a_pi = 2, b_pi = 300,
-                                              a_phi = 1.25, b_phi = 0.1,
-                                              a_c = 80, b_c = 20,
-                                              fc = 1),
-                          beads.args = list(lower = 1),
-                          jags.params = list(
-                              n.chains = 1, n.adapt = 1e3,
-                              n.iter = 1e4, thin = 1, na.rm = TRUE,
-                              burn.in = 0, post.thin = 1,
-                              seed = as.numeric(format(Sys.Date(),
-                                                       "%Y%m%d"))),
-                          sample.dir = NULL,
-                          assay.names = c(
-                              phi = NULL, phi_Z = "logfc", Z = "prob",
-                              c = "sampleInfo", pi = "sampleInfo"),
-                          summarize = TRUE){
-
+    prior.params = list(
+        method = "edgeR",
+        a_pi = 2, b_pi = 300,
+        a_phi = 1.25, b_phi = 0.1,
+        a_c = 80, b_c = 20,
+        fc = 1
+    ),
+    beads.args = list(lower = 1),
+    jags.params = list(
+        n.chains = 1, n.adapt = 1e3,
+        n.iter = 1e4, thin = 1, na.rm = TRUE,
+        burn.in = 0, post.thin = 1,
+        seed = as.numeric(format(
+            Sys.Date(),
+            "%Y%m%d"
+        ))
+    ),
+    sample.dir = NULL,
+    assay.names = c(
+        phi = NULL, phi_Z = "logfc", Z = "prob",
+        c = "sampleInfo", pi = "sampleInfo"
+    ),
+    summarize = TRUE) {
     .checkCounts(object)
 
     ## Check and tidy inputs
@@ -48,26 +53,36 @@
     assay.names <- .tidyAssayNames(assay.names)
 
     ## Create temporary directory for output of JAGS models
-    tmp.dir <- if(is.null(sample.dir)) {
-        paste0(tempdir(), "/beer_run",
-               as.numeric(format(Sys.Date(), "%Y%m%d")))
-    } else normalizePath(sample.dir, mustWork = FALSE)
+    tmp.dir <- if (is.null(sample.dir)) {
+        paste0(
+            tempdir(), "/beer_run",
+            as.numeric(format(Sys.Date(), "%Y%m%d"))
+        )
+    } else {
+        normalizePath(sample.dir, mustWork = FALSE)
+    }
 
     ## Check if any sample files exist
     beads_id <- colnames(object[, object$group == getBeadsName()])
-    if(any(file.exists(paste0(tmp.dir, "/", beads_id, ".rds")))){
+    if (any(file.exists(paste0(tmp.dir, "/", beads_id, ".rds")))) {
         cli::cli_alert_warning(
-            paste0("Sample files already exist in the specified directory. ",
-                   "Some files may be overwritten.")
+            paste0(
+                "Sample files already exist in the specified directory. ",
+                "Some files may be overwritten."
+            )
         )
-    } else if (!dir.exists(tmp.dir)) { dir.create(tmp.dir, recursive = TRUE) }
+    } else if (!dir.exists(tmp.dir)) {
+        dir.create(tmp.dir, recursive = TRUE)
+    }
 
     progressr::handlers("txtprogressbar")
     p <- progressr::progressor(along = colnames(object))
 
-    jags_out <- future_lapply(beads_id, function(sample){
-        sample_counter <- paste0(which(colnames(object) == sample), " of ",
-                                 length(beads_id))
+    jags_out <- future_lapply(beads_id, function(sample) {
+        sample_counter <- paste0(
+            which(colnames(object) == sample), " of ",
+            length(beads_id)
+        )
         p(sample_counter, class = "sticky", amount = 1)
 
         # recode existing object
@@ -75,43 +90,60 @@
         one_beads$group[colnames(one_beads) == sample] <- "sample"
 
         ## Calculate new beads-only priors
-        new_beads <- if(prior.params$method == "custom"){
+        new_beads <- if (prior.params$method == "custom") {
             beads.prior
         } else {
-            do.call(getAB, c(list(object = subsetBeads(one_beads),
-                                  method = prior.params$method),
-                             beads.args))
+            do.call(getAB, c(
+                list(
+                    object = subsetBeads(one_beads),
+                    method = prior.params$method
+                ),
+                beads.args
+            ))
         }
 
-        new_prior <- c(list(a_0 = new_beads[["a_0"]],
-                            b_0 = new_beads[["b_0"]]),
-                       prior.params[c("a_pi", "b_pi", "a_phi", "b_phi",
-                                      "a_c", "b_c", "fc")])
+        new_prior <- c(
+            list(
+                a_0 = new_beads[["a_0"]],
+                b_0 = new_beads[["b_0"]]
+            ),
+            prior.params[c(
+                "a_pi", "b_pi", "a_phi", "b_phi",
+                "a_c", "b_c", "fc"
+            )]
+        )
 
-        jags_run <- do.call(.brew_one, c(list(object = one_beads,
-                                              sample = sample,
-                                              prior.params = new_prior),
-                                        jags.params))
+        jags_run <- do.call(.brew_one, c(
+            list(
+                object = one_beads,
+                sample = sample,
+                prior.params = new_prior
+            ),
+            jags.params
+        ))
 
         saveRDS(jags_run, paste0(tmp.dir, "/", sample, ".rds"))
 
         Sys.getpid()
     })
 
-    if(summarize){
+    if (summarize) {
         out <- summarizeRun(object, paste0(tmp.dir, "/", beads_id, ".rds"),
-                     matrix(FALSE, nrow(object), ncol(object),
-                            dimnames = dimnames(object)),
-                     burn.in = jags.params$burn.in,
-                     post.thin = jags.params$post.thin,
-                     assay.names)
+            matrix(FALSE, nrow(object), ncol(object),
+                dimnames = dimnames(object)
+            ),
+            burn.in = jags.params$burn.in,
+            post.thin = jags.params$post.thin,
+            assay.names
+        )
 
         ## Clean-up after summarization
-        if(is.null(sample.dir)){
+        if (is.null(sample.dir)) {
             unlink(tmp.dir, recursive = TRUE)
         }
-
-    } else out <- unlist(jags_out)
+    } else {
+        out <- unlist(jags_out)
+    }
 
     out
 }
@@ -134,7 +166,7 @@
 #' @import PhIPData SummarizedExperiment
 #' @importFrom future.apply future_lapply
 .beadsRR_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
-                           assay.names = c(logfc = "logfc", prob = "prob")){
+    assay.names = c(logfc = "logfc", prob = "prob")) {
 
     ## Set-up output matrices ----------
     ## Make empty matrix for the cases where fc and prob do not exist
@@ -142,17 +174,21 @@
     colnames(empty_mat) <- colnames(object)
     rownames(empty_mat) <- rownames(object)
 
-    edgeR_fc <- if(assay.names[["logfc"]] %in% assayNames(object)){
+    edgeR_fc <- if (assay.names[["logfc"]] %in% assayNames(object)) {
         assay(object, assay.names[["logfc"]])
-    } else { empty_mat }
+    } else {
+        empty_mat
+    }
 
-    edgeR_pval <- if(assay.names[["prob"]] %in% assayNames(object)){
+    edgeR_pval <- if (assay.names[["prob"]] %in% assayNames(object)) {
         assay(object, assay.names[["prob"]])
-    } else { empty_mat }
+    } else {
+        empty_mat
+    }
 
     beads_names <- colnames(subsetBeads(object))
 
-    output <- future_lapply(beads_names, function(sample){
+    output <- future_lapply(beads_names, function(sample) {
         ## Recode existing object
         one_beads <- object
         one_beads$group[colnames(one_beads) == sample] <- "sample"
@@ -164,12 +200,14 @@
         trended_disp <- edgeR_beads$trended.dispersion
 
         ## Run edgeR for the one beads-only sample ------------
-        .edgeR_one(one_beads, sample, beads_names[beads_names != sample],
-                   common_disp, tagwise_disp, trended_disp)
+        .edgeR_one(
+            one_beads, sample, beads_names[beads_names != sample],
+            common_disp, tagwise_disp, trended_disp
+        )
     })
 
     ## Unnest output
-    for(result in output){
+    for (result in output) {
         edgeR_fc[, result$sample] <- result$logfc
         edgeR_pval[, result$sample] <- result$log10pval
     }
@@ -223,11 +261,13 @@
 #'
 #' beadsRR(sim_data, method = "beer")
 #' beadsRR(sim_data, method = "edgeR")
-#'
 #' @export
-beadsRR <- function(object, method, ...){
-    if(!method %in% c("edgeR", "beer")){
+beadsRR <- function(object, method, ...) {
+    if (!method %in% c("edgeR", "beer")) {
         stop("Invalid specified method for beads-only round robin.")
-    } else if (method == "edgeR"){ .beadsRR_edgeR(object, ...)
-    } else {.beadsRR_beer(object, ...)}
+    } else if (method == "edgeR") {
+        .beadsRR_edgeR(object, ...)
+    } else {
+        .beadsRR_beer(object, ...)
+    }
 }

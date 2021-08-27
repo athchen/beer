@@ -49,7 +49,6 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 beadsRR(sim_data, method = "beer")
 beadsRR(sim_data, method = "edgeR")
-
 }
 \seealso{
 \code{\link{brew}} for BEER parameters, \code{\link{edgeR}} for

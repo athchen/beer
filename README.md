@@ -4,16 +4,11 @@
 # beer <img src='man/figures/logo.png' align="right" height="138" />
 
 <!-- badges: start -->
-
-[![Codecov test
-coverage](https://codecov.io/gh/athchen/beer/branch/master/graph/badge.svg)](https://codecov.io/gh/athchen/beer?branch=master)
-[![R-CMD-check](https://github.com/athchen/beer/workflows/R-CMD-check/badge.svg)](https://github.com/athchen/beer/actions)
 <!-- badges: end -->
 
 ## TO-DO
 
 -   Add bioarxiv link to @seealso in `phipseq_model.R`
--   Update rest of `README.Rmd`
 -   Change data pointer in `inst/extdata/sim_data.R`
 -   Add url to vignette
 
@@ -240,7 +235,7 @@ colSums(assay(edgeR_beadsRR, "edgeR_hits"))
 
 ## References
 
-[1] ADD REFERENCE
+[1] Chen A,
 
 [2] Robinson MD and Smyth GK (2008). Small-sample estimation of negative
 binomial dispersion, with applications to SAGE data. Biostatistics, 9,

@@ -122,15 +122,13 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 brew(sim_data)
 
 ## Multisession evaluation
-\dontrun{
-beer(sim_data, parallel = "multisession")
-}
-
+brew(sim_data, parallel = "multisession")
 }
 \seealso{
 \code{[future::plan]} for parallelization options,
 \code{\link{beadsRR}} for running each beads-only sample against all
-remaining samples, \code{\link{getAB}} for more information about valid parameters for estimating beads-only prior parameters,
+remaining samples, \code{\link{getAB}} for more information about valid
+ parameters for estimating beads-only prior parameters,
 \code{\link{guessEnriched}} for more information about how clearly
 enriched peptides are identified, and \code{[rjags::jags.model]} for
 MCMC sampling parameters.

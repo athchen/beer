@@ -1,8 +1,10 @@
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 test_that("Prior parameters are correctly tidied", {
-    prior.params <- list(a_pi = 2, b_pi = 300, a_phi = 1.25, b_phi = 0.1,
-                        a_c = 80, b_c = 20, fc = 1)
+    prior.params <- list(
+        a_pi = 2, b_pi = 300, a_phi = 1.25, b_phi = 0.1,
+        a_c = 80, b_c = 20, fc = 1
+    )
     beads_args <- list(lower = 1)
     tidied_inputs <- .tidyInputsPrior(prior.params, sim_data, beads_args)
 
@@ -18,14 +20,18 @@ test_that("Prior parameters are correctly tidied", {
 
     ## Missing priors returns an error
     prior.params$a_phi <- NULL
-    expect_error(.tidyInputsPrior(prior.params, sim_data, beads_args),
-                 "elements are missing")
+    expect_error(
+        .tidyInputsPrior(prior.params, sim_data, beads_args),
+        "elements are missing"
+    )
     prior.params$a_phi <- 1.25
 
     ## Invalid specified method
     prior.params$method <- "test"
-    expect_error(.tidyInputsPrior(prior.params, sim_data, beads_args),
-                 "Invalid specified method")
+    expect_error(
+        .tidyInputsPrior(prior.params, sim_data, beads_args),
+        "Invalid specified method"
+    )
 
     ## No extra parameters are returned
     prior.params$method <- "edgeR"
@@ -43,33 +49,49 @@ test_that("SE parameters are correctly tidied", {
 
     ## Error for invalid method
     se_params$method <- "test"
-    expect_error(.tidyInputsSE(se_params, beads_prior),
-                 "Invalid specified method")
+    expect_error(
+        .tidyInputsSE(se_params, beads_prior),
+        "Invalid specified method"
+    )
 
     ## Add correct defaults
     se_params$method <- "edgeR"
-    expect_equal(names(.tidyInputsSE(se_params, beads_prior)),
-                       c("method", "threshold", "fc.name"))
+    expect_equal(
+        names(.tidyInputsSE(se_params, beads_prior)),
+        c("method", "threshold", "fc.name")
+    )
     se_params$method <- "mle"
-    expect_equal(names(.tidyInputsSE(se_params, beads_prior)),
-                 c("method", "threshold", "beads.prior"))
+    expect_equal(
+        names(.tidyInputsSE(se_params, beads_prior)),
+        c("method", "threshold", "beads.prior")
+    )
 
     ## No extra parameters
-    se_params <- list(method = "edgeR", threshold = 15, fc.name = "prob",
-                      extra = "extra")
-    expect_equal(names(.tidyInputsSE(se_params, beads_prior)),
-                 c("method", "threshold", "fc.name"))
-    se_params <- list(method = "mle", threshold = 5,
-                      beads.prior = "beasd.prior", extra = "extra")
-    expect_equal(names(.tidyInputsSE(se_params, beads_prior)),
-                 c("method", "threshold", "beads.prior"))
+    se_params <- list(
+        method = "edgeR", threshold = 15, fc.name = "prob",
+        extra = "extra"
+    )
+    expect_equal(
+        names(.tidyInputsSE(se_params, beads_prior)),
+        c("method", "threshold", "fc.name")
+    )
+    se_params <- list(
+        method = "mle", threshold = 5,
+        beads.prior = "beasd.prior", extra = "extra"
+    )
+    expect_equal(
+        names(.tidyInputsSE(se_params, beads_prior)),
+        c("method", "threshold", "beads.prior")
+    )
 })
 
 test_that("JAGS parameters are correctly tidied", {
-    jags.params <- list(n.chains = 1, n.adapt = 1e3,
-                        n.iter = 1e4, thin = 1, na.rm = TRUE,
-                        burn.in = 0, post.thin = 1,
-                        seed = as.numeric(format(Sys.Date(), "%Y%m%d")))
+    jags.params <- list(
+        n.chains = 1, n.adapt = 1e3,
+        n.iter = 1e4, thin = 1, na.rm = TRUE,
+        burn.in = 0, post.thin = 1,
+        seed = as.numeric(format(Sys.Date(), "%Y%m%d"))
+    )
 
     ## Missing params
     jags.params$post.thin <- NULL
@@ -77,14 +99,20 @@ test_that("JAGS parameters are correctly tidied", {
 
     ## Extra params
     jags.params$extra <- "extra"
-    expect_equal(names(.tidyInputsJAGS(jags.params)),
-                 c("n.chains", "n.adapt", "n.iter", "thin", "na.rm",
-                   "burn.in", "post.thin", "seed"))
+    expect_equal(
+        names(.tidyInputsJAGS(jags.params)),
+        c(
+            "n.chains", "n.adapt", "n.iter", "thin", "na.rm",
+            "burn.in", "post.thin", "seed"
+        )
+    )
 })
 
 test_that("Assay names are correctly tidied", {
-    assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob",
-                    c = "sampleInfo", pi = "sampleInfo")
+    assay.names <- c(
+        phi = NULL, phi_Z = "logfc", Z = "prob",
+        c = "sampleInfo", pi = "sampleInfo"
+    )
     ## Missing parameters
     expect_equal(.tidyAssayNames(assay.names)[["phi"]], NA_character_)
 
@@ -102,8 +130,10 @@ test_that("Assay names are correctly tidied", {
     ## Extra parameters
     assay.names[["extra"]] <- "extra"
     assay.names["phi"] <- NA
-    expect_equal(names(.tidyAssayNames(assay.names)),
-                 c("phi", "phi_Z", "Z", "c", "pi"))
+    expect_equal(
+        names(.tidyAssayNames(assay.names)),
+        c("phi", "phi_Z", "Z", "c", "pi")
+    )
 })
 
 cli::test_that_cli("warns when overwriting sampleInfo", {
@@ -120,18 +150,22 @@ test_that("brew can run with multisession and sequential evaluation", {
     ## Also check that files are saved in the right directory
     ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
     # if exists delete
-    if(dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
-    brew_seq <- brew(sim_data, parallel = "sequential",
-                     sample.dir = ex_dir,
-                     jags.params = list(seed = 123))
+    if (dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
+    brew_seq <- brew(sim_data,
+        parallel = "sequential",
+        sample.dir = ex_dir,
+        jags.params = list(seed = 123)
+    )
     expect_identical(plan(), curr_plan)
     expect_equal(list.files(ex_dir), paste0(c(10, 5:9), ".rds"))
     # Clean directory
     unlink(ex_dir, recursive = TRUE)
 
     ## Multisession, check that current plan is properly reset
-    brew_multi <- brew(sim_data, parallel = "multisession",
-                       jags.params = list(seed = 123))
+    brew_multi <- brew(sim_data,
+        parallel = "multisession",
+        jags.params = list(seed = 123)
+    )
     expect_identical(plan(), curr_plan)
 
     ## Check that there's nothing different
@@ -145,9 +179,11 @@ test_that("brew works with beadsRR", {
         ## Also check that files are saved in the right directory
         ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
         # if exists delete
-        if(dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
-        brew(sim_data, jags.params = list(seed = 123),
-             sample.dir = ex_dir, beadsRR = TRUE)
+        if (dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
+        brew(sim_data,
+            jags.params = list(seed = 123),
+            sample.dir = ex_dir, beadsRR = TRUE
+        )
         # Clean directory
         unlink(ex_dir, recursive = TRUE)
     })

@@ -22,13 +22,15 @@ Depends:
     PhIPData (>= 1.1.1), 
     rjags
 Imports:
-    methods, 
-    SummarizedExperiment, 
+    cli, 
     edgeR,
-    cli,
     future, 
-    future.apply, 
-    progressr
+    future.apply,
+    methods, 
+    progressr,
+    stats,
+    SummarizedExperiment, 
+    utils
 Suggests: 
     testthat (>= 3.0.0),
     BiocStyle, 
@@ -37,7 +39,7 @@ Suggests:
     rmarkdown, 
     dplyr, 
     ggplot2
-biocViews: Software, StatisticalMethod, Bayesian
+biocViews: Software, StatisticalMethod, Bayesian, Sequencing, Coverage
 BugReports: https://github.com/athchen/beer/issues
 Collate:
     'beadsRR.R'

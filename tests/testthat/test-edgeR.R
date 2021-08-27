@@ -4,13 +4,17 @@ test_that("edgeR corrects for poorly specified assay.names", {
 
     ## Unnamed assay.names vector
     edgeR_out <- edgeR(sim_data, assay.names = c("logfc", "prob"))
-    expect_equal(unname(.checkOverwrite(edgeR_out, c("logfc", "prob"))),
-                 c(TRUE, TRUE))
+    expect_equal(
+        unname(.checkOverwrite(edgeR_out, c("logfc", "prob"))),
+        c(TRUE, TRUE)
+    )
 
     ## Shorter vector length
     edgeR_out <- edgeR(sim_data, assay.names = c("logfc"))
-    expect_equal(unname(.checkOverwrite(edgeR_out, c("logfc", "prob"))),
-                 c(TRUE, TRUE))
+    expect_equal(
+        unname(.checkOverwrite(edgeR_out, c("logfc", "prob"))),
+        c(TRUE, TRUE)
+    )
 })
 
 cli::test_that_cli("warns when overwriting matrices", {

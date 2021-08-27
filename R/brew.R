@@ -13,38 +13,52 @@ NULL
 #' @return tidied list of prior parameters.
 #'
 #' @import PhIPData
-.tidyInputsPrior <- function(prior.params, object, beads.args){
-    params <- c("method", "a_0", "b_0", "a_pi", "b_pi",
-                "a_phi", "b_phi", "a_c", "b_c", "fc")
+.tidyInputsPrior <- function(prior.params, object, beads.args) {
+    params <- c(
+        "method", "a_0", "b_0", "a_pi", "b_pi",
+        "a_phi", "b_phi", "a_c", "b_c", "fc"
+    )
 
     ## Set missing parameters to defaults
-    if(!"method" %in% names(prior.params)){
-        if(all(c("a_0", "b_0") %in% names(prior.params))){
+    if (!"method" %in% names(prior.params)) {
+        if (all(c("a_0", "b_0") %in% names(prior.params))) {
             prior.params$method <- "custom"
-        } else prior.params$method <- "edgeR"
+        } else {
+            prior.params$method <- "edgeR"
+        }
     }
 
-    if(!all(c("a_0", "b_0") %in% names(prior.params))){
-        beads_ab <- do.call(getAB, c(list(object = subsetBeads(object),
-                                          method = prior.params$method),
-                                     beads.args))
+    if (!all(c("a_0", "b_0") %in% names(prior.params))) {
+        beads_ab <- do.call(getAB, c(
+            list(
+                object = subsetBeads(object),
+                method = prior.params$method
+            ),
+            beads.args
+        ))
         prior.params$a_0 <- beads_ab[["a_0"]]
         prior.params$b_0 <- beads_ab[["b_0"]]
     }
 
-    if(!"fc" %in% names(prior.params)) prior.params$fc <- 1
+    if (!"fc" %in% names(prior.params)) prior.params$fc <- 1
 
     ## Check that all necessary prior params are specified
-    if(!all(params %in% names(prior.params))){
-        missing_params <- params[!params %in% names(prior.params)]
-        stop(paste0("The following elements are missing in prior.params: ",
-                    paste0(missing_params, collapse = ", "), "."))
+    if (!all(params %in% names(prior.params))) {
+        missing_params <- paste0(params[!params %in% names(prior.params)],
+            collapse = ", "
+        )
+        stop(
+            "The following elements are missing in prior.params: ",
+            missing_params, "."
+        )
     }
 
     ## Check that method is valid
-    if(!prior.params$method %in% c("edgeR", "mle", "mom", "custom")){
-        stop(paste0("Invalid specified method. ",
-                    "Valid methods are 'custom', 'edgeR', 'mle', and 'mom'."))
+    if (!prior.params$method %in% c("edgeR", "mle", "mom", "custom")) {
+        stop(
+            "Invalid specified method. ",
+            "Valid methods are 'custom', 'edgeR', 'mle', and 'mom'."
+        )
     }
 
     ## Return only needed parameters
@@ -60,28 +74,27 @@ NULL
 #' @param beads.prior data.frame with beads-only parameters
 #'
 #' @return tidied list of parameters for identifying super-enriched peptides.
-.tidyInputsSE <- function(se.params, beads.prior){
+.tidyInputsSE <- function(se.params, beads.prior) {
 
     ## Set method to default if it is missing
-    if(!"method" %in% names(se.params)) se.params$method <- "mle"
+    if (!"method" %in% names(se.params)) se.params$method <- "mle"
 
     ## Check that method is valid
-    if(!se.params$method %in% c("edgeR", "mle")){
-        stop(paste0("Invalid specified method. ",
-                    "Valid methods are 'edgeR' and 'mle'"))
+    if (!se.params$method %in% c("edgeR", "mle")) {
+        stop("Invalid specified method. Valid methods are 'edgeR' and 'mle'")
     }
 
     ## Set missing parameters to defaults and return only needed parameters
-    if(se.params$method == "edgeR"){
-        if(!"threshold" %in% names(se.params)) se.params$threshold <- 15
-        if(!"fc.name" %in% names(se.params)) se.params$fc.name <- "logfc"
+    if (se.params$method == "edgeR") {
+        if (!"threshold" %in% names(se.params)) se.params$threshold <- 15
+        if (!"fc.name" %in% names(se.params)) se.params$fc.name <- "logfc"
 
         se.params[c("method", "threshold", "fc.name")]
-
     } else {
-        if(!"threshold" %in% names(se.params)) se.params$threshold <- 15
-        if(!"beads.prior" %in% names(se.params))
-            se.params$beads.prior <- beads.prior
+        if (!"threshold" %in% names(se.params)) se.params$threshold <- 15
+        if (!"beads.prior" %in% names(se.params)) {
+              se.params$beads.prior <- beads.prior
+          }
 
         se.params[c("method", "threshold", "beads.prior")]
     }
@@ -95,26 +108,33 @@ NULL
 #' @param jags.params named list of JAGS parameters
 #'
 #' @return tidied list of JAGS parameters.
-.tidyInputsJAGS <- function(jags.params){
+.tidyInputsJAGS <- function(jags.params) {
+    default <- list(
+        n.chains = 1, n.adapt = 1e3,
+        n.iter = 1e4, thin = 1, na.rm = TRUE,
+        burn.in = 0, post.thin = 1,
+        seed = as.numeric(format(Sys.Date(), "%Y%m%d"))
+    )
 
-    default <- list(n.chains = 1, n.adapt = 1e3,
-                    n.iter = 1e4, thin = 1, na.rm = TRUE,
-                    burn.in = 0, post.thin = 1,
-                    seed = as.numeric(format(Sys.Date(), "%Y%m%d")))
-
-    params <- c("n.chains", "n.adapt",
-                "n.iter", "thin", "na.rm",
-                "burn.in", "post.thin", "seed")
+    params <- c(
+        "n.chains", "n.adapt",
+        "n.iter", "thin", "na.rm",
+        "burn.in", "post.thin", "seed"
+    )
 
     ## Add missing inputs
     missing_params <- params[!params %in% names(jags.params)]
     jags.params[missing_params] <- default[missing_params]
 
     ## Check that all jags params are specified
-    if(!all(params %in% names(jags.params))){
-        missing_params <- params[!params %in% names(jags.params)]
-        stop(paste0("The following elements are missing in jags.params: ",
-                    paste0(missing_params, collapse = ", "), "."))
+    if (!all(params %in% names(jags.params))) {
+        missing_params <- paste0(params[!params %in% names(jags.params)],
+            collapse = ", "
+        )
+        stop(
+            "The following elements are missing in jags.params: ",
+            missing_params, "."
+        )
     }
 
     ## Return tidied jags needed parameters
@@ -129,10 +149,11 @@ NULL
 #' @param assay.names named list specifying where to store each assay.
 #'
 #' @return tidied list of assay.names
-.tidyAssayNames <- function(assay.names){
-
-    default <- c(phi = NA, phi_Z = "logfc", Z = "prob",
-                 c = "sampleInfo", pi = "sampleInfo")
+.tidyAssayNames <- function(assay.names) {
+    default <- c(
+        phi = NA, phi_Z = "logfc", Z = "prob",
+        c = "sampleInfo", pi = "sampleInfo"
+    )
 
     assays <- c("phi", "phi_Z", "Z", "c", "pi")
 
@@ -141,13 +162,17 @@ NULL
     assay.names[missing_assays] <- default[missing_assays]
 
     ## Check that c and pi assay options are valid
-    valid <- c(is.na(assay.names["c"]) | assay.names["c"] == "sampleInfo",
-               is.na(assay.names["pi"]) | assay.names["pi"] == "sampleInfo")
-    if(sum(valid) != 2){
-        stop(paste0("Invalid location specified. ",
-                    paste0(c("c", "pi")[!valid], collapse = " and "),
-                    " can only be stored in the sampleInfo of a ",
-                    "PhIPData object (or not stored)."))
+    valid <- c(
+        is.na(assay.names["c"]) | assay.names["c"] == "sampleInfo",
+        is.na(assay.names["pi"]) | assay.names["pi"] == "sampleInfo"
+    )
+    if (sum(valid) != 2) {
+        stop(
+            "Invalid location specified. ",
+            paste0(c("c", "pi")[!valid], collapse = " and "),
+            " can only be stored in the sampleInfo of a PhIPData object ",
+            "(or not stored)."
+        )
     }
 
     ## Check that phi, phi_Z, Z are unique assays
@@ -180,54 +205,62 @@ NULL
 #' or the specified directory.
 #'
 #' @examples
-#' \dontrun{
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 #'
 #' beads_prior <- getAB(subsetBeads(sim_data), "edgeR")
-#' .brew_one(sim_data, "9", list(a_0 = beads_prior[["a_0"]],
-#'           b_0 = beads_prior[["b_0"]],
-#'           a_pi = 2, b_pi = 300,
-#'           a_phi = 1.25, b_phi = 0.1,
-#'           a_c = 80, b_c = 20,
-#'           fc = 1))
-#' }
-#'
+#' .brew_one(sim_data, "9", list(
+#'     a_0 = beads_prior[["a_0"]],
+#'     b_0 = beads_prior[["b_0"]],
+#'     a_pi = 2, b_pi = 300,
+#'     a_phi = 1.25, b_phi = 0.1,
+#'     a_c = 80, b_c = 20,
+#'     fc = 1
+#' ))
 #' @export
 #' @import PhIPData
 #' @importFrom rjags coda.samples
 #' @importFrom utils capture.output
 .brew_one <- function(object, sample, prior.params,
-                     n.chains = 1, n.adapt = 1e3,
-                     n.iter = 1e4, thin = 1, na.rm = TRUE, ...,
-                     seed = as.numeric(format(Sys.Date(), "%Y%m%d"))){
+    n.chains = 1, n.adapt = 1e3,
+    n.iter = 1e4, thin = 1, na.rm = TRUE, ...,
+    seed = as.numeric(format(Sys.Date(), "%Y%m%d"))) {
     ## Define data
-    data_list <- list(N = 1,
-                      P = nrow(object),
-                      B = 0,
-                      n = librarySize(object[, sample], withDimnames = FALSE),
-                      Y = unname(counts(object)[, sample, drop = FALSE]))
+    data_list <- list(
+        N = 1,
+        P = nrow(object),
+        B = 0,
+        n = librarySize(object[, sample], withDimnames = FALSE),
+        Y = unname(counts(object)[, sample, drop = FALSE])
+    )
     data_list <- c(data_list, prior.params)
 
     ## Define initial values
-    inits_list <- guessInits(object[, sample],
-                             list(a_0 = prior.params[["a_0"]],
-                                  b_0 = prior.params[["b_0"]]))
+    inits_list <- guessInits(
+        object[, sample],
+        list(
+            a_0 = prior.params[["a_0"]],
+            b_0 = prior.params[["b_0"]]
+        )
+    )
     inits_list$`.RNG.name` <- "base::Wichmann-Hill"
     inits_list$`.RNG.seed` <- seed
 
     model_file <- system.file("extdata/phipseq_model.bugs", package = "beer")
 
-    #Compile and run model
+    # Compile and run model
     capture.output({
-        jags_model <- rjags::jags.model(file = model_file,
-                                        data = data_list,
-                                        inits = inits_list,
-                                        n.chains = n.chains,
-                                        n.adapt = n.adapt)
+        jags_model <- rjags::jags.model(
+            file = model_file,
+            data = data_list,
+            inits = inits_list,
+            n.chains = n.chains,
+            n.adapt = n.adapt
+        )
         mcmc <- coda.samples(jags_model,
-                             variable.names = c("c", "pi", "Z", "phi"),
-                             n.iter = n.iter, thin = thin,
-                             na.rm = na.rm, ...)
+            variable.names = c("c", "pi", "Z", "phi"),
+            n.iter = n.iter, thin = thin,
+            na.rm = na.rm, ...
+        )
     })
 
     mcmc
@@ -255,38 +288,54 @@ NULL
 #'
 #' @import PhIPData
 .brew_samples <- function(object, sample_id, beads_id, se.matrix,
-                          prior.params, beads.prior, beads.args, jags.params,
-                          tmp.dir){
+    prior.params, beads.prior, beads.args, jags.params,
+    tmp.dir) {
     progressr::handlers("txtprogressbar")
     p <- progressr::progressor(along = sample_id)
 
-    jags_out <- future.apply::future_lapply(sample_id, function(sample){
-        sample_counter <- paste0(which(sample_id == sample), " of ",
-                                 length(sample_id))
+    jags_out <- future.apply::future_lapply(sample_id, function(sample) {
+        sample_counter <- paste0(
+            which(sample_id == sample), " of ",
+            length(sample_id)
+        )
         p(sample_counter, class = "sticky", amount = 1)
 
         ## Subset super-enriched and only single sample
         one_sample <- object[!se.matrix[, sample], c(beads_id, sample)]
 
         ## Calculate new beads-only priors
-        new_beads <- if(prior.params$method == "custom"){
+        new_beads <- if (prior.params$method == "custom") {
             lapply(beads.prior, function(x) x[!se.matrix[, sample]])
         } else {
-            do.call(getAB, c(list(object = subsetBeads(one_sample),
-                                  method = prior.params$method),
-                             beads.args))
+            do.call(getAB, c(
+                list(
+                    object = subsetBeads(one_sample),
+                    method = prior.params$method
+                ),
+                beads.args
+            ))
         }
 
-        new_prior <- c(list(a_0 = new_beads[["a_0"]],
-                            b_0 = new_beads[["b_0"]]),
-                       prior.params[c("a_pi", "b_pi", "a_phi", "b_phi",
-                                      "a_c", "b_c", "fc")])
+        new_prior <- c(
+            list(
+                a_0 = new_beads[["a_0"]],
+                b_0 = new_beads[["b_0"]]
+            ),
+            prior.params[c(
+                "a_pi", "b_pi", "a_phi", "b_phi",
+                "a_c", "b_c", "fc"
+            )]
+        )
 
-        jags_run <- do.call(.brew_one, c(list(object = one_sample,
-                                              sample = sample,
-                                              prior.params = new_prior,
-                                              quiet = TRUE),
-                                         jags.params))
+        jags_run <- do.call(.brew_one, c(
+            list(
+                object = one_sample,
+                sample = sample,
+                prior.params = new_prior,
+                quiet = TRUE
+            ),
+            jags.params
+        ))
 
         saveRDS(jags_run, paste0(tmp.dir, "/", sample, ".rds"))
 
@@ -384,7 +433,8 @@ NULL
 #'
 #' @seealso \code{[future::plan]} for parallelization options,
 #' \code{\link{beadsRR}} for running each beads-only sample against all
-#' remaining samples, \code{\link{getAB}} for more information about valid parameters for estimating beads-only prior parameters,
+#' remaining samples, \code{\link{getAB}} for more information about valid
+#'  parameters for estimating beads-only prior parameters,
 #' \code{\link{guessEnriched}} for more information about how clearly
 #' enriched peptides are identified, and \code{[rjags::jags.model]} for
 #' MCMC sampling parameters.
@@ -396,10 +446,7 @@ NULL
 #' brew(sim_data)
 #'
 #' ## Multisession evaluation
-#' \dontrun{
-#' beer(sim_data, parallel = "multisession")
-#' }
-#'
+#' brew(sim_data, parallel = "multisession")
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
 #' @importFrom cli cli_alert_warning
@@ -407,31 +454,41 @@ NULL
 #'
 #' @export
 brew <- function(object,
-                 prior.params = list(method = "edgeR",
-                                     a_pi = 2, b_pi = 300,
-                                     a_phi = 1.25, b_phi = 0.1,
-                                     a_c = 80, b_c = 20,
-                                     fc = 1),
-                 beads.args = list(lower = 1),
-                 se.params = list(method = "mle"),
-                 jags.params = list(n.chains = 1, n.adapt = 1e3,
-                                    n.iter = 1e4, thin = 1, na.rm = TRUE,
-                                    burn.in = 0, post.thin = 1,
-                                    seed = as.numeric(format(Sys.Date(),
-                                                             "%Y%m%d"))),
-                 sample.dir = NULL,
-                 assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob",
-                                 c = "sampleInfo", pi = "sampleInfo"),
-                 beadsRR = FALSE,
-                 parallel = "sequential"){
-
+    prior.params = list(
+        method = "edgeR",
+        a_pi = 2, b_pi = 300,
+        a_phi = 1.25, b_phi = 0.1,
+        a_c = 80, b_c = 20,
+        fc = 1
+    ),
+    beads.args = list(lower = 1),
+    se.params = list(method = "mle"),
+    jags.params = list(
+        n.chains = 1, n.adapt = 1e3,
+        n.iter = 1e4, thin = 1, na.rm = TRUE,
+        burn.in = 0, post.thin = 1,
+        seed = as.numeric(format(
+            Sys.Date(),
+            "%Y%m%d"
+        ))
+    ),
+    sample.dir = NULL,
+    assay.names = c(
+        phi = NULL, phi_Z = "logfc", Z = "prob",
+        c = "sampleInfo", pi = "sampleInfo"
+    ),
+    beadsRR = FALSE,
+    parallel = "sequential") {
     .checkCounts(object)
 
     ## Check and tidy inputs
     prior.params <- .tidyInputsPrior(prior.params, object, beads.args)
     beads.prior <- prior.params[c("a_0", "b_0")]
-    se.params <- if(!is.null(se.params)) { .tidyInputsSE(se.params, beads.prior)
-    } else { NULL }
+    se.params <- if (!is.null(se.params)) {
+        .tidyInputsSE(se.params, beads.prior)
+    } else {
+        NULL
+    }
     jags.params <- .tidyInputsJAGS(jags.params)
     assay.names <- .tidyAssayNames(assay.names)
     parallel <- .tidyParallel(parallel)
@@ -446,73 +503,99 @@ brew <- function(object,
     sample_id <- colnames(object[, object$group != getBeadsName()])
 
     ## Guess which peptides are super-enriched
-    se.matrix <- if(is.null(se.params)){
+    se.matrix <- if (is.null(se.params)) {
         matrix(FALSE, nrow(object), ncol(object),
-               dimnames = dimnames(object))
+            dimnames = dimnames(object)
+        )
     } else {
         do.call(guessEnriched, c(list(object = object), se.params))
     }
 
     ## Create temporary directory for output of JAGS models
-    tmp.dir <- if(is.null(sample.dir)) {
-        paste0(tempdir(), "/beer_run",
-               as.numeric(format(Sys.Date(), "%Y%m%d")))
-    } else normalizePath(sample.dir, mustWork = FALSE)
+    tmp.dir <- if (is.null(sample.dir)) {
+        paste0(
+            tempdir(), "/beer_run",
+            as.numeric(format(Sys.Date(), "%Y%m%d"))
+        )
+    } else {
+        normalizePath(sample.dir, mustWork = FALSE)
+    }
 
     # Check if any sample files exist
-    samples_run <- if(beadsRR) c(beads_id, sample_id) else sample_id
+    samples_run <- if (beadsRR) c(beads_id, sample_id) else sample_id
     samples_files <- paste0(tmp.dir, "/", samples_run, ".rds")
-    if(any(file.exists(samples_files))){
+    if (any(file.exists(samples_files))) {
         cli::cli_alert_warning(
-            paste0("Sample files already exist in the specified directory. ",
-                   "Some files may be overwritten.")
+            paste0(
+                "Sample files already exist in the specified directory. ",
+                "Some files may be overwritten."
+            )
         )
-    } else if (!dir.exists(tmp.dir)) { dir.create(tmp.dir, recursive = TRUE) }
+    } else if (!dir.exists(tmp.dir)) {
+        dir.create(tmp.dir, recursive = TRUE)
+    }
 
     ## Check whether assays will be overwritten
-    beads_over <- .checkOverwrite(object[, object$group == getBeadsName()],
-                                  assay.names)
-    sample_over <- .checkOverwrite(object[ ,object$group != getBeadsName()],
-                                   assay.names)
-    msg <- if(beadsRR & any(beads_over | sample_over, na.rm = TRUE)){
-        paste0("Values in the following assays will be overwritten: ",
-               paste0(unique(assay.names[beads_over | sample_over]),
-                      collapse = ", "))
+    beads_over <- .checkOverwrite(
+        object[, object$group == getBeadsName()],
+        assay.names
+    )
+    sample_over <- .checkOverwrite(
+        object[, object$group != getBeadsName()],
+        assay.names
+    )
+    msg <- if (beadsRR & any(beads_over | sample_over, na.rm = TRUE)) {
+        paste0(
+            "Values in the following assays will be overwritten: ",
+            paste0(unique(assay.names[beads_over | sample_over]),
+                collapse = ", "
+            )
+        )
     } else if (!beadsRR & any(sample_over, na.rm = TRUE)) {
-        paste0("Values in the following assays will be overwritten: ",
-               paste0(unique(assay.names[beads_over & sample_over]),
-                      collapse = ", "))
-    } else character(0)
-    if(length(msg) > 0) cli::cli_alert_warning(msg)
+        paste0(
+            "Values in the following assays will be overwritten: ",
+            paste0(unique(assay.names[beads_over & sample_over]),
+                collapse = ", "
+            )
+        )
+    } else {
+        character(0)
+    }
+    if (length(msg) > 0) cli::cli_alert_warning(msg)
 
     ## Run model one sample at a time
     cli::cli_h1("Running JAGS")
-    if(beadsRR){
+    if (beadsRR) {
         cli::cli_text("Beads-only round robin")
         progressr::with_progress({
-            beads_pid <- beadsRR(subsetBeads(object), method = "beer",
-                                 prior.params, beads.args, jags.params,
-                                 tmp.dir, assay.names, FALSE)
+            beads_pid <- beadsRR(subsetBeads(object),
+                method = "beer",
+                prior.params, beads.args, jags.params,
+                tmp.dir, assay.names, FALSE
+            )
         })
     }
 
     cli::cli_text("Sample runs")
     progressr::with_progress({
-        pids <- .brew_samples(object, sample_id, beads_id, se.matrix,
-                              prior.params, beads.prior, beads.args,
-                              jags.params, tmp.dir)
+        pids <- .brew_samples(
+            object, sample_id, beads_id, se.matrix,
+            prior.params, beads.prior, beads.args,
+            jags.params, tmp.dir
+        )
     })
 
     ## Summarize output
     cli::cli_h1("Summarizing results")
     run_out <- summarizeRun(object, samples_files,
-                            se.matrix,
-                            burn.in = jags.params$burn.in,
-                            post.thin = jags.params$post.thin,
-                            assay.names)
+        se.matrix,
+        burn.in = jags.params$burn.in,
+        post.thin = jags.params$post.thin,
+        assay.names
+    )
 
     ## Clean-up if necessary
-    if(is.null(sample.dir)){
+    if (is.null(sample.dir)) {
         unlink(tmp.dir, recursive = TRUE)
     }
 

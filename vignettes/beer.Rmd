@@ -64,7 +64,7 @@ To demonstrate `beer`, we simulate a small toy data set of 10 samples, each with
 Parameters for non-enriched peptides were derived from beads-only samples run with samples from HIV elite controllers. For the code to generate the data set, see `file.path(package = "beer", "script/sim_data.R")`. 
 
 ```{r load_data}
-data_path <- system.file("extdata/sim_data.RDS", package = "beer")
+data_path <- system.file("extdata/sim_data.rds", package = "beer")
 sim_data <- readRDS(data_path)
 
 sim_data
