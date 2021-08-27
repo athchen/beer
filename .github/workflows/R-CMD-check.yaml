@@ -55,17 +55,48 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
+      - name: Set path for RTools 4.0
+        if: runner.os == 'Windows'
+        run: echo "C:/rtools40/usr/bin;C:/rtools40/mingw64/bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Install most Windows system dependencies
+        if: runner.os == 'Windows'
         run: |
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
+          pacman -Syu mingw-w64-x86_64-make --noconfirm
+          g++ --version
+          Get-Command g++ | Select-Object -ExpandProperty Definition
+          mingw32-make --version
+          Get-Command mingw32-make | Select-Object -ExpandProperty Definition
+          (New-Object System.Net.WebClient).DownloadFile('https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/Windows/JAGS-4.3.0.exe', 'C:\JAGS-4.3.0.exe')
+        shell: powershell
+
+      - name: Install JAGS on Windows
+        if: runner.os == 'Windows'
+        run: C:\JAGS-4.3.0.exe /S
+        shell: cmd
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        env:
+          RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
+        run: |
+          sudo apt-get install -y libglpk-dev
+          Rscript -e "remotes::install_github('r-hub/sysreqs')"
+          sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
+          sudo -s eval "$sysreqs"
+          sudo -s apt-get install jags
+          sudo -s apt-get install libv8-dev
+          sudo -s apt-get install libnode-dev
+
+      - name: Install Mac system dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew install jags
+          brew install libgit2
 
       - name: Install dependencies
         run: |
-          remotes::install_deps(dependencies = TRUE)
+          remotes::install_deps(dependencies = TRUE, type = ifelse(tolower(Sys.info()["sysname"]) == "linux", "source", "binary"))
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
