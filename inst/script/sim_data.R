@@ -1,13 +1,10 @@
 #' Simulate a small data set for testing purposes.
 #'
-#' Beads-only prior parameters are estimated based on EC data provided at
-#' [INSERT BEER_MANUSCRIPT/RAW_DATA/HIV_EC.RDS url]
+#' Beads-only prior parameters are estimated based on EC data provided below in
+#' `hiv_url`.
 
-# TODO CHANGE POINTER, package data so the RDA/RDS is only a PhIPData obj.
-# hiv_url <- "https://github.com/athchen/beer_manuscript/blob/master/data_raw/hiv.rds"
-# hiv <- readRDS(url(hiv_url, "rb"))
-
-hiv <- readRDS("~/GitHub/beer_manuscript/data_raw/hiv.rds")
+hiv_url <- "https://github.com/athchen/beer_manuscript/blob/master/data_raw/hiv.rds"
+hiv <- readRDS(url(hiv_url, "rb"))
 
 # Simulate data -----------
 set.seed(20210223)

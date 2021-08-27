@@ -30,7 +30,7 @@ Phage immuno-precipitation sequencing (PhIP-seq) is a high-throughput approach f
 
 The first approach is based on `r Biocpkg("edgeR")`'s standard pipeline for identifying differential expression from read count data. Though `r Biocpkg("edgeR")` is remarkably effective at quickly identifying enriched antibody responses, it is less likely to pick up enriched peptides at the lower fold-change range. 
 
-The second approach, Bayesian Estimation in R (BEER) was developed specifically for the PhIP-seq setting and implements a Bayesian model to identify peptide enrichments as described in Chen et. al^[ADD REFERENCE]. Though BEER is more likely to identify enriched peptides at the lower fold-change range, it tends to take much longer to run. 
+The second approach, Bayesian Estimation in R (BEER) was developed specifically for the PhIP-seq setting and implements a Bayesian model to identify peptide enrichments as described in Chen et. al^[Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I. Detecting enriched antibody peptides in phage immuno-precipitation sequencing data (2021). _In Preparation_]. Though BEER is more likely to identify enriched peptides at the lower fold-change range, it tends to take much longer to run. 
 
 Along with `beer`, we will use the following packages in this vignette:
 
@@ -41,8 +41,27 @@ library(dplyr)
 
 # Installation
 
-We recommend installing the stable release version of `beer` in Bioconductor.
-This can be done using `BiocManager`:
+## `rjags`
+
+For Bayesian MCMC modeling, `beer` relies on `r CRANpkg("rjags")` to interface [Just Another Gibbs Sampler (JAGS)](https://mcmc-jags.sourceforge.io/). JAGS can be downloaded from [this link](https://sourceforge.net/projects/mcmc-jags/files/). [Homebrew](https://brew.sh/) users can install JAGS using,
+
+```
+brew install jags
+```
+
+Once JAGS has been installed, `r CRANpkg("rjags")` can be installed in `R` via `install.packages("rjags")`. 
+
+## `PhIPData`
+
+Additionally, `beer` requires `PhIPData` with a version greater than 1.1.0. We recommend installing `PhIPData` from Github, 
+
+```{r install_phipdata, eval = FALSE}
+devtools::install_github("athchen/PhIPData")
+```
+
+## `beer`
+
+Once `rjags` and `PhIPData` have been installed, the stable release version of `beer` in Bioconductor can be installed using `BiocManager`:
 
 ```{r install_beer, eval = FALSE}
 if (!require("BiocManager"))

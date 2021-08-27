@@ -6,12 +6,6 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-## TO-DO
-
--   Add bioarxiv link to @seealso in `phipseq_model.R`
--   Change data pointer in `inst/extdata/sim_data.R`
--   Add url to vignette
-
 Phage immuno-precipitation sequencing (PhIP-seq) is a high-throughput
 approach for characterizing antibody responses to a variety of target
 antigens. A typical component of PhIP-seq analyses involves identifying
@@ -41,8 +35,34 @@ synchronously or asynchronously as supported by
 
 ## Installation
 
-We recommend installing the stable release version of `beer` in
-Bioconductor. This can be done using `BiocManager`:
+### `rjags`
+
+For Bayesian MCMC modeling, `beer` relies on
+[`rjags`](https://cran.r-project.org/web/packages/rjags/index.html) to
+interface [Just Another Gibbs Sampler
+(JAGS)](https://mcmc-jags.sourceforge.io/). JAGS can be downloaded from
+[this link](https://sourceforge.net/projects/mcmc-jags/files/).
+[Homebrew](https://brew.sh/) users can install JAGS using,
+
+    brew install jags
+
+Once JAGS has been installed,
+[`rjags`](https://cran.r-project.org/web/packages/rjags/index.html) can
+be installed in `R` via `install.packages("rjags")`.
+
+### `PhIPData`
+
+Additionally, `beer` requires `PhIPData` with a version greater than
+1.1.0. We recommend installing `PhIPData` from Github,
+
+``` r
+devtools::install_github("athchen/PhIPData")
+```
+
+### `beer`
+
+Once `rjags` and `PhIPData` have been installed, the stable release
+version of `beer` in Bioconductor can be installed using `BiocManager`:
 
 ``` r
 if (!require("BiocManager"))
