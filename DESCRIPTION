@@ -22,7 +22,6 @@ Depends:
     PhIPData (>= 1.1.1), 
     rjags
 Imports:
-    BiocStyle, 
     edgeR,
     cli,
     future, 
@@ -30,6 +29,7 @@ Imports:
     progressr
 Suggests: 
     testthat (>= 3.0.0),
+    BiocStyle, 
     covr,
     knitr,
     rmarkdown

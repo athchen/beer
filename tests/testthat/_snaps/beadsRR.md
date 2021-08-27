@@ -10,6 +10,6 @@
       rownames(50): 1 2 ... 49 50
       rowData names(2): a_0 b_0
       colnames(10): 1 2 ... 9 10
-      colData names(5): group n_init n c pi
+      colData names(7): group n_init ... c pi
       beads-only name(4): beads
 

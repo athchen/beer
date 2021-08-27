@@ -19,6 +19,7 @@ test_that("Overwritten assays are identified", {
                      c = "sampleInfo", pi = "sampleInfo")
 
     ## Non-empty sampleInfo
+    tmp_data$c <- tmp_data$pi <- rep("test", ncol(sim_data))
     expect_equal(unname(.checkOverwrite(tmp_data, assay.names)),
                  c(FALSE, FALSE, FALSE, TRUE, TRUE))
 

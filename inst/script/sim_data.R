@@ -4,22 +4,10 @@
 #' [INSERT BEER_MANUSCRIPT/RAW_DATA/HIV_EC.RDS url]
 
 # TODO CHANGE POINTER, package data so the RDA/RDS is only a PhIPData obj.
-load("~/Dropbox/KK/data/20190711_8plates_new.rda")
+# hiv_url <- "https://github.com/athchen/beer_manuscript/blob/master/data_raw/hiv.rds"
+# hiv <- readRDS(url(hiv_url, "rb"))
 
-# Select 100 peptides
-hiv_peps <- grep("Human immunodeficiency virus", fdata$taxon_species)[1:50]
-
-# Select beads-only samples
-beads_ind <- which(pdata$study == "BEADS_ONLY" &
-                       grepl("plate3", pdata$unique_ID_repl))
-pdata$group <- ifelse(pdata$study == "BEADS_ONLY", "beads", pdata$study)
-
-# Create PhIPData obj
-hiv <- PhIPData(counts = edata[hiv_peps, beads_ind],
-                peptideInfo = fdata[hiv_peps, ],
-                sampleInfo = pdata[beads_ind, ])
-
-rm(list = ls()[ls() != "hiv"])
+hiv <- readRDS("~/GitHub/beer_manuscript/data_raw/hiv.rds")
 
 # Simulate data -----------
 set.seed(20210223)
@@ -28,7 +16,7 @@ set.seed(20210223)
 N <- 10
 P <- 50
 B <- c(rep(1, 4), rep(0, 6))
-n <- round(abs(rnorm(N, 1e6, 1e5)))
+n <- round(abs(rnorm(N, 1.5e6, 1e5)))
 
 # beads_only parameters, arrange peptides by proportion
 beads_params <- beer::getAB(hiv, lower = 1) |>
@@ -36,20 +24,22 @@ beads_params <- beer::getAB(hiv, lower = 1) |>
     dplyr::mutate(mean = a_0/(a_0 + b_0)) |>
     dplyr::arrange(mean)
 
-a_0 <- beads_params$a_0
-b_0 <- beads_params$b_0
+# Randomly select peptides
+pep_ind <- sort(sample(1:nrow(hiv), 50))
+a_0 <- beads_params$a_0[pep_ind]
+b_0 <- beads_params$b_0[pep_ind]
 
 # proportion of peptides enriched
-pi <- c(rep(0, sum(B)), rep(0.05, N - sum(B)))
 Z <- cbind(matrix(0, nrow = P, ncol = sum(B)),
            sapply(1:(N - sum(B)), function(x) sample(c(rep(1, 5), rep(0, 45)))))
+pi <- colMeans(Z)
 
 # fold-changes
 phi <- apply(Z, 2, function(x) {
     phi_j <- rep(1, P)
-    phi_cat <- as.vector(matrix(c(runif(1, 1, 2), runif(1, 2, 4),
+    phi_cat <- as.vector(matrix(c(runif(1, 2, 4),
                                   runif(1, 4, 8), runif(1, 8, 16),
-                                  runif(1, 16, 32)),
+                                  runif(2, 16, 32)),
                                 nrow = 5, byrow = TRUE))
     phi_j[which(x!= 0)] <- phi_cat
     phi_j
@@ -113,7 +103,7 @@ c <- sapply(1:N, function(x){
 sample_params <- data.frame(group = c(rep("beads", sum(B)),
                                       rep("sample", N - sum(B))),
                             n_init = n_init,
-                            n = n, c = c, pi = pi)
+                            n = n, true_c = c, true_pi = pi)
 pep_params <- data.frame(a_0 = a_0, b_0 = b_0)
 prior_params <- list(seed = 20210223,
                      a_pi = 1000, b_pi = 2.4e4,

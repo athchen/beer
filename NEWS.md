@@ -1,2 +1,2 @@
-# beer 0.1.0
+# beer 0.99.0
 * Submitted to Bioconductor
