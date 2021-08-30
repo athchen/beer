@@ -79,11 +79,11 @@
 #' @param assay.names named vector specifying the assay names for the
 #' log2(fold-change) and exact test p-values. If the vector is not names, the
 #' first and second entries are used as defaults
+#' @param beadsRR logical value specifying whether each beads-only sample
+#' should be compared to all other beads-only samples.
 #' @param parallel character indicating which parallelization strategy to use.
 #' Alternatively, a named list of parameters available in
 #' \code{[future::plan]}.
-#' @param beadsRR logical value specifying whether each beads-only sample
-#' should be compared to all other beads-only samples.
 #'
 #' @return PhIPData object with log2 estimated fold-changes and p-values for
 #' enrichment stored in the assays specified by `assay.names`.
@@ -105,8 +105,8 @@
 #' @export
 edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob"),
-    parallel = "sequential",
-    beadsRR = FALSE) {
+    beadsRR = FALSE,
+    parallel = "sequential") {
 
     # Add names to assay.names vector
     if (is.null(names(assay.names))) {
