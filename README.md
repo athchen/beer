@@ -255,7 +255,9 @@ colSums(assay(edgeR_beadsRR, "edgeR_hits"))
 
 ## References
 
-[1] Chen A,
+[1] Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski, I. Detecting
+enriched antibody peptides in phage immuno-precipitation sequencing
+data. Manuscript in preparation.
 
 [2] Robinson MD and Smyth GK (2008). Small-sample estimation of negative
 binomial dispersion, with applications to SAGE data. Biostatistics, 9,

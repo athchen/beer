@@ -22,7 +22,7 @@ Phage immuno-precipitation sequencing (PhIP-seq) is a high-throughput approach f
 
 The first approach is based on [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html)'s standard pipeline for identifying differential expression from read count data. Though [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is remarkably effective at quickly identifying enriched antibody responses, it is less likely to pick up enriched peptides at the lower fold-change range. 
 
-The second approach, Bayesian Estimation in R (BEER) was developed specifically for the PhIP-seq setting and implements a Bayesian model to identify peptide enrichments as described in Chen et. al^[Chen A, ]. Though BEER is more likely to identify enriched peptides at the lower fold-change range, it tends to take much longer to run. 
+The second approach, Bayesian Estimation in R (BEER) was developed specifically for the PhIP-seq setting and implements a Bayesian model to identify peptide enrichments as described in Chen et. al^[Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I. Detecting enriched antibody peptides in phage immuno-precipitation sequencing data (2021). _Manuscript in Preparation_]. Though BEER is more likely to identify enriched peptides at the lower fold-change range, it tends to take much longer to run. 
 
 Below we give a brief overview of the two approaches. For more information, see the vignette [Estimating Antibody Enrichment in PhIP-Seq Experiments with BEER](addurl). Both methods can be run in synchronously or asynchronously as supported by [`future`](https://cran.r-project.org/web/packages/future/index.html). 
 
