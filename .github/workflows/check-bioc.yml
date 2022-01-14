@@ -122,6 +122,9 @@ jobs:
           sysreqs=$(Rscript -e 'cat("apt-get update -y && apt-get install -y", paste(gsub("apt-get install -y ", "", remotes::system_requirements("ubuntu", "20.04")), collapse = " "))')
           echo $sysreqs
           sudo -s eval "$sysreqs"
+          sudo -s apt-get install jags
+          sudo -s apt-get install libv8-dev
+          sudo -s apt-get install libnode-dev
 
       - name: Install macOS system dependencies
         if: matrix.config.os == 'macOS-latest'
@@ -143,11 +146,28 @@ jobs:
           ## Required for tcltk
           brew install xquartz --cask
 
-      - name: Install Windows system dependencies
+          ## For installing rjags
+          brew install jags
+
+      - name: Set path for RTools 4.0
+        if: runner.os == 'Windows'
+        run: echo "C:/rtools40/usr/bin;C:/rtools40/mingw64/bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Install most Windows system dependencies
         if: runner.os == 'Windows'
         run: |
-          ## Edit below if you have any Windows system dependencies
-        shell: Rscript {0}
+          pacman -Syu mingw-w64-x86_64-make --noconfirm
+          g++ --version
+          Get-Command g++ | Select-Object -ExpandProperty Definition
+          mingw32-make --version
+          Get-Command mingw32-make | Select-Object -ExpandProperty Definition
+          (New-Object System.Net.WebClient).DownloadFile('https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/Windows/JAGS-4.3.0.exe', 'C:\JAGS-4.3.0.exe')
+        shell: powershell
+
+      - name: Install JAGS on Windows
+        if: runner.os == 'Windows'
+        run: C:\JAGS-4.3.0.exe /S
+        shell: cmd
 
       - name: Install BiocManager
         run: |
