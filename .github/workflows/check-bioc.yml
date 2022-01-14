@@ -167,11 +167,6 @@ jobs:
           ## (New-Object System.Net.WebClient).DownloadFile('https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/Windows/JAGS-4.3.0.exe', 'C:\JAGS-4.3.0.exe')
         shell: cmd
 
-      - name: Install JAGS on Windows
-        if: runner.os == 'Windows'
-        run: C:\JAGS-4.3.0.exe /S
-        shell: cmd
-
       - name: Install BiocManager
         run: |
           message(paste('****', Sys.time(), 'installing BiocManager ****'))
