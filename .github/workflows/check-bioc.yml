@@ -149,9 +149,9 @@ jobs:
           ## For installing rjags
           brew install jags
 
-      - name: Set path for RTools 4.0
-        if: runner.os == 'Windows'
-        run: echo "C:/rtools40/usr/bin;C:/rtools40/mingw64/bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+## - name: Set path for RTools 4.2
+##   if: runner.os == 'Windows'
+##   run: echo "C:/rtools40/usr/bin;C:/rtools40/mingw64/bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
       - name: Install most Windows system dependencies
         if: runner.os == 'Windows'
