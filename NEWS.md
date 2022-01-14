@@ -1,3 +1,3 @@
-# BEER 0.99.0 (2021-08-27)
+# BEER 0.99.0 (2022-01-13)
 
 * Submitted to Bioconductor

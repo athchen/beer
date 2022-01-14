@@ -60,7 +60,7 @@ model {
 
       # Distribution of phis
       phi_sample[i, j] ~ dgamma(a_phi, b_phi)
-      phi[i, j] <- (B[j] + 1 - Z[i, j])*1 + Z[i, j]*(fc + phi_sample[i, j])
+      phi[i, j] <- (1 - Z[i, j])*1 + Z[i, j]*(fc + phi_sample[i, j])
 
       # Define a's and b's, theta's for Z_ij = 1, B_j = 0
       mean_e[i, j] <- min(phi[i, j]*c[j]*a_0[i]/(a_0[i] + b_0[i]), 1)

@@ -53,10 +53,13 @@ Once JAGS has been installed, `r CRANpkg("rjags")` can be installed in `R` via `
 
 ## `PhIPData`
 
-Additionally, `beer` requires `PhIPData` with a version greater than 1.1.0. We recommend installing `PhIPData` from Github, 
+Additionally, `beer` requires `PhIPData` with a version greater than 1.1.0. We recommend installing the latest version of `PhIPData` from Bioconductor, 
 
 ```{r install_phipdata, eval = FALSE}
-devtools::install_github("athchen/PhIPData")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("PhIPData")
 ```
 
 ## `beer`
@@ -64,9 +67,6 @@ devtools::install_github("athchen/PhIPData")
 Once `rjags` and `PhIPData` have been installed, the stable release version of `beer` in Bioconductor can be installed using `BiocManager`:
 
 ```{r install_beer, eval = FALSE}
-if (!require("BiocManager"))
-    install.packages("BiocManager")
-    
 BiocManager::install("beer")
 ```
 
