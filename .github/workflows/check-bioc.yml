@@ -159,12 +159,6 @@ jobs:
           curl.exe -o wjags.exe --url https://www.r-project.org/nosvn/winutf8/ucrt3/extra/jags/JAGS-4.3.0.exe
           wjags.exe /S
           del wjags.exe
-          ## pacman -Syu mingw-w64-x86_64-make --noconfirm
-          ## g++ --version
-          ## Get-Command g++ | Select-Object -ExpandProperty Definition
-          ## mingw32-make --version
-          ## Get-Command mingw32-make | Select-Object -ExpandProperty Definition
-          ## (New-Object System.Net.WebClient).DownloadFile('https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/Windows/JAGS-4.3.0.exe', 'C:\JAGS-4.3.0.exe')
         shell: cmd
 
       - name: Install BiocManager
