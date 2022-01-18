@@ -36,6 +36,8 @@ For Bayesian MCMC modeling, `beer` relies on [`rjags`](https://cran.r-project.or
 brew install jags
 ```
 
+For M1 Mac users using Rosetta emulation of intel, Homebrew installation of JAGS will likely work. However, we recommend installing JAGS from source for all other M1 Mac users. 
+
 Once JAGS has been installed, [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html) can be installed in `R` via `install.packages("rjags")`. 
 
 ### `PhIPData`

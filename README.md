@@ -23,9 +23,9 @@ fold-change range.
 
 The second approach, Bayesian Estimation in R (BEER) was developed
 specifically for the PhIP-seq setting and implements a Bayesian model to
-identify peptide enrichments as described in Chen et. al[1]. Though BEER
-is more likely to identify enriched peptides at the lower fold-change
-range, it tends to take much longer to run.
+identify peptide enrichments as described in Chen et. al[^1]. Though
+BEER is more likely to identify enriched peptides at the lower
+fold-change range, it tends to take much longer to run.
 
 Below we give a brief overview of the two approaches. For more
 information, see the vignette [Estimating Antibody Enrichment in
@@ -45,6 +45,10 @@ interface [Just Another Gibbs Sampler
 [Homebrew](https://brew.sh/) users can install JAGS using,
 
     brew install jags
+
+For M1 Mac users using Rosetta emulation of intel, Homebrew installation
+of JAGS will likely work. However, we recommend installing JAGS from
+source for all other M1 Mac users.
 
 Once JAGS has been installed,
 [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html) can
@@ -86,7 +90,7 @@ peptides. Thus, to identify enriched peptides, we can run the standard
 pipeline for differential expression.
 
 The `edgeR()` function estimates peptide-specific dispersion parameters
-then runs the exact test proposed by Robinson and Smyth[2] for the
+then runs the exact test proposed by Robinson and Smyth[^2] for the
 difference in mean between two groups of negative binomial random
 variables. Since peptides are enriched only if average proportion of
 reads pulled in the serum sample is higher than the average proportion
@@ -255,10 +259,10 @@ colSums(assay(edgeR_beadsRR, "edgeR_hits"))
 
 ## References
 
-[1] Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski, I. Detecting
-enriched antibody peptides in phage immuno-precipitation sequencing
-data. Manuscript in preparation.
+[^1]: Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I. Detecting
+    enriched antibody peptides in phage immuno-precipitation sequencing
+    data (2021). *Manuscript in Preparation*
 
-[2] Robinson MD and Smyth GK (2008). Small-sample estimation of negative
-binomial dispersion, with applications to SAGE data. Biostatistics, 9,
-321-332.
+[^2]: Robinson MD and Smyth GK (2008). Small-sample estimation of
+    negative binomial dispersion, with applications to SAGE data.
+    Biostatistics, 9, 321-332.
