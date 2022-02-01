@@ -22,7 +22,7 @@ a peptide.
 }
 \description{
 Beta shape parameters are estimated using the proportion of
-reads-pulled per petide across the beads-only samples. Currently, only three
+reads-pulled per peptide across the beads-only samples. Currently, only three
 estimation methods are supported: edgeR, method of moments (MOM),
 maximum likelihood (MLE). Note that edgeR can only be used on
 \code{\link[PhIPData]{PhIPData}} objects while MOM and MLE methods can also
@@ -55,7 +55,7 @@ sample mean and variance to shape parameters of the beta distribution. For
 \itemize{
     \item \code{offsets}: vector defining the offset to use when the mean
     and/or variance are zero.
-    \item \code{lower}: lowerbound for the shape parameters.
+    \item \code{lower}: lower bound for the shape parameters.
     \item \code{upper}: upper bound for the shape parameters.
     \item \code{...}: parameters passed to \code{[base::mean]} and
     \code{[stats::var]}.
@@ -71,7 +71,7 @@ used. Parameters for MLE estimates include:
      is 0.
      \item \code{optim.method}: optimization method passed to
      \code{[stats::optim]}.
-     \item \code{lower}: lowerbound for the shape parameters.
+     \item \code{lower}: lower bound for the shape parameters.
      \item \code{upper}: upper bound for the shape parameters.
 }
 }

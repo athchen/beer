@@ -1,7 +1,7 @@
 # warns when overwriting matrices [plain]
 
     Code
-      edgeR(sim_data, assay.names = c("logfc", "counts"))
+      runEdgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
       ! Values in the following assays will be overwritten: counts
     Output
@@ -18,7 +18,7 @@
 # warns when overwriting matrices [ansi]
 
     Code
-      edgeR(sim_data, assay.names = c("logfc", "counts"))
+      runEdgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
       [33m![39m Values in the following assays will be overwritten: counts
     Output
@@ -35,7 +35,7 @@
 # warns when overwriting matrices [unicode]
 
     Code
-      edgeR(sim_data, assay.names = c("logfc", "counts"))
+      runEdgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
       ! Values in the following assays will be overwritten: counts
     Output
@@ -52,7 +52,7 @@
 # warns when overwriting matrices [fancy]
 
     Code
-      edgeR(sim_data, assay.names = c("logfc", "counts"))
+      runEdgeR(sim_data, assay.names = c("logfc", "counts"))
     Message <cliMessage>
       [33m![39m Values in the following assays will be overwritten: counts
     Output
@@ -69,7 +69,7 @@
 # edgeR works with beadsRR
 
     Code
-      edgeR(sim_data, beadsRR = TRUE)
+      runEdgeR(sim_data, beadsRR = TRUE)
     Output
       class: PhIPData 
       dim: 50 10 

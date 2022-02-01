@@ -14,7 +14,7 @@
 #' @param post.thin thinning parameter
 #'
 #' @return list of point estimates for c, pi, phi and Z
-summarizeRun_one <- function(object, file, se.matrix,
+summarizeRunOne <- function(object, file, se.matrix,
     burn.in = 0, post.thin = 1) {
     sample <- regmatches(file, regexec("/([^/]*)\\.rds", file))[[1]][2]
 
@@ -163,7 +163,7 @@ summarizeRun <- function(object, jags.files, se.matrix,
             length(jags.files)
         )
         p(file_counter, class = "sticky", amount = 1)
-        summarizeRun_one(object, file, se.matrix, burn.in, post.thin)
+        summarizeRunOne(object, file, se.matrix, burn.in, post.thin)
     })
 
     for (out in files_out) {

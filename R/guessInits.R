@@ -24,7 +24,7 @@
 #'
 #' @return a list of estimated initial values.
 #'
-#' @seealso \emph{Appendix} in the Chen et. al 2022
+#' @seealso \emph{Methods} in [Chen et. al 2022](https://www.biorxiv.org/content/10.1101/2022.01.19.476926v1)
 #'
 #' @import PhIPData
 #' @importFrom stats coef lm

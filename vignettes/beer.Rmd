@@ -28,7 +28,11 @@ knitr::opts_chunk$set(
 
 Phage immuno-precipitation sequencing (PhIP-seq) is a high-throughput approach for characterizing antibody responses to a variety of target antigens. A typical component of PhIP-seq analyses involves identifying which peptides elicit enriched antibody responses. `beer` provides two approaches for identifying peptide enrichments. 
 
-The first approach is based on `r Biocpkg("edgeR")`'s standard pipeline for identifying differential expression from read count data. Though `r Biocpkg("edgeR")` is remarkably effective at quickly identifying enriched antibody responses, it is less likely to pick up enriched peptides at the lower fold-change range. 
+The first approach is based on [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html)'s standard pipeline for identifying differential expression from read count data[^edgeRBioc][^edgeRDE][^edgeRF]. Though [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is remarkably effective at quickly identifying enriched antibody responses, it is less likely to pick up enriched peptides at the lower fold-change range. 
+
+[^edgeRBioc]: Robinson MD, McCarthy DJ and Smyth GK (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics 26, 139-140
+[^edgeRDE]: McCarthy DJ, Chen Y and Smyth GK (2012). Differential expression analysis of multifactor RNA-Seq experiments with respect to biological variation. Nucleic Acids Research 40, 4288-4297
+[^edgeRF]: Chen Y, Lun ATL, Smyth GK (2016). From reads to genes to pathways: differential expression analysis of RNA-Seq experiments using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research 5, 1438
 
 The second approach, Bayesian Estimation in R (BEER) was developed specifically for the PhIP-seq setting and implements a Bayesian model to identify peptide enrichments as described in Chen et. al^[Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I. Detecting antibody reactivities in phage immunoprecipitation sequencing data (2022). _bioRxiv_. https://www.biorxiv.org/content/10.1101/2022.01.19.476926v1]. Though BEER is more likely to identify enriched peptides at the lower fold-change range, it tends to take much longer to run. 
 
@@ -52,17 +56,6 @@ brew install jags
 For M1 Mac users using Rosetta emulation of intel, Homebrew installation of JAGS will likely work. However, we recommend installing JAGS from source for all other M1 Mac users. 
 
 Once JAGS has been installed, `r CRANpkg("rjags")` can be installed in `R` via `install.packages("rjags")`. 
-
-## `PhIPData`
-
-Additionally, `beer` requires `PhIPData` with a version greater than 1.1.0. We recommend installing the latest version of `PhIPData` from Bioconductor, 
-
-```{r install_phipdata, eval = FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("PhIPData")
-```
 
 ## `beer`
 
@@ -124,14 +117,14 @@ as(sim_data, "DataFrame") %>%
 
 Differentially enriched peptides between a particular serum sample and all beads-only samples indicate enriched antibody responses to those peptides. Thus, to identify enriched peptides, we can run the standard `r Biocpkg("edgeR")` pipeline for differential expression. 
 
-The `edgeR()` function estimates peptide-specific dispersion parameters then runs the exact test proposed by Robinson and Smyth^[Robinson MD and Smyth GK. Small-sample estimation of negative binomial dispersion, with applications to SAGE data (2008). _Biostatistics_, 9, 321-332. https://doi.org/10.1093/biostatistics/kxm030] for the difference in mean between two groups of negative binomial random variables. Since peptides are enriched only if average proportion of reads pulled in the serum sample is higher than the average proportion of reads pulled in a beads-only samples, two-sided p-values are converted to one-sided p-values. 
+The `runEdgeR()` function estimates peptide-specific dispersion parameters then runs the exact test proposed by Robinson and Smyth^[Robinson MD and Smyth GK. Small-sample estimation of negative binomial dispersion, with applications to SAGE data (2008). _Biostatistics_, 9, 321-332. https://doi.org/10.1093/biostatistics/kxm030] for the difference in mean between two groups of negative binomial random variables. Since peptides are enriched only if average proportion of reads pulled in the serum sample is higher than the average proportion of reads pulled in a beads-only samples, two-sided p-values are converted to one-sided p-values. 
 
 edgeR log10 p-values and log2 estimated fold-changes are returned in the assays specified by **`assay.names`**. 
 
 ```{r edgeR}
-edgeR_out <- edgeR(sim_data, 
-                   assay.names = c(logfc = "edgeR_logfc", 
-                                   prob = "edgeR_logpval"))
+edgeR_out <- runEdgeR(sim_data, 
+                      assay.names = c(logfc = "edgeR_logfc",
+                                      prob = "edgeR_logpval"))
 ```
 
 Using BH correction to adjust for multiple testing, enriched peptides are given by the matrix, 
@@ -157,7 +150,7 @@ BEER uses a Bayesian hierarchical model to derive posterior probabilities of enr
 4. **Initialize and run the MCMCs.** To reduce convergence time, MLE estimates are used to initialize the MCMC sampler, and samples are drawn from the posterior distributions of the unknown parameters. 
 5. **Summarize and store results.** Posterior samples are summarized using the means of the posterior distribution and are stored in the PhIPData object. 
 
-BEER can be easily run with `brew()`. Like with `edgeR()`, results are stored in the locations specified by `assay.names`. We can add the existing results to our edgeR output as follows. 
+BEER can be easily run with `brew()`. Like with `runEdgeR()`, results are stored in the locations specified by `assay.names`. We can add the existing results to our edgeR output as follows. 
 
 ```{r beer, results = FALSE, message=FALSE, warning = FALSE, error = FALSE}
 ## Named vector specifying where we want to store the summarized MCMC output
@@ -247,13 +240,13 @@ Is is important to note that MCMC parameters are indexed by row and column. Sinc
 
 To approximate the false positive rate, we often run each of the beads-only samples against all other beads-only samples. This beads-only round robin also provides a sense of how similar the beads-only samples are to each other. 
 
-The beads-only round robin can be included in `brew()` and `edgeR()` by specifying `beadsRR = TRUE`. 
+The beads-only round robin can be included in `brew()` and `runEdgeR()` by specifying `beadsRR = TRUE`. 
 
 ```{r edgeR_beadsRR}
 ## edgeR with beadsRR
-edgeR_beadsRR <- edgeR(sim_data, beadsRR = TRUE, 
-                       assay.names = c(logfc = "edgeR_logfc", 
-                                       prob = "edgeR_logpval"))
+edgeR_beadsRR <- runEdgeR(sim_data, beadsRR = TRUE, 
+                          assay.names = c(logfc = "edgeR_logfc", 
+                                          prob = "edgeR_logpval"))
 ## Calculate hits
 assay(edgeR_beadsRR, "edgeR_hits") <- apply(
   assay(edgeR_beadsRR, "edgeR_logpval"), 2, 
@@ -317,12 +310,12 @@ colSums(beer_hits)
 
 # Parallelization
 
-By default, `beer` runs each sample sequentially. However, parallelization is also supported via [`future`](https://cran.r-project.org/web/packages/future/index.html) and [`future.apply`](https://cran.r-project.org/web/packages/future.apply/index.html) packages. Parallelization parameters are specified to both `brew()` and `edgeR()` via a character vector or a list of parameters passed to `future::plan()`. For more information on the availble evaluation options, we highly recommend this [`future` vignette](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html). 
+By default, `beer` runs each sample sequentially. However, parallelization is also supported via [`future`](https://cran.r-project.org/web/packages/future/index.html) and [`future.apply`](https://cran.r-project.org/web/packages/future.apply/index.html) packages. Parallelization parameters are specified to both `brew()` and `runEdgeR()` via a character vector or a list of parameters passed to `future::plan()`. For more information on the available evaluation options, we highly recommend this [`future` vignette](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html). 
 
 ```{r}
 ## Run edgeR in parallel
-edgeR(sim_data, parallel = "multisession")
-edgeR(sim_data, parallel = list(strategy = "multisession", workers = 2))
+runEdgeR(sim_data, parallel = "multisession")
+runEdgeR(sim_data, parallel = list(strategy = "multisession", workers = 2))
 
 ## Run beer in parallel
 brew(sim_data, parallel = "multisession")

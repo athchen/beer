@@ -1,7 +1,5 @@
-#' @include edgeR.R utils.R
-
 ### edgeR estimates  ==============================================
-#' @title Derive beta shape parameters using edgeR dispersion estimates
+#' Derive beta shape parameters using edgeR dispersion estimates
 #'
 #' Given a \code{\link[PhIPData]{PhIPData}} object, beads-only shape parameters
 #' are estimated by first deriving the peptide-specific edgeR dispersion
@@ -22,7 +20,7 @@
 #' corresponding to estimated shape parameters of the beta distribution.
 #'
 #' @seealso [.edgeRBeads()] for estimating \eqn{\phi^{edgeR}}
-.getAB_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
+.getABEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     lower = 1, upper = Inf) {
     edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
 
@@ -56,14 +54,14 @@
 #' @param prop vector of proportions.
 #' @param offsets vector defining the offset to use when the mean and/or
 #' variance are zero.
-#' @param lower lowerbound for the shape parameters.
+#' @param lower lower bound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
 #' @param ... parameters passed to \code{[base::mean]} and
 #' \code{[stats::var]}.
 #'
 #' @importFrom stats var
 #' @return a data frame with MOM estimates of a, b
-.getAB_MOM_prop <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
+.getABMOMProp <- function(prop, offsets = c(mean = 1e-8, var = 1e-8),
     lower = 1, upper = Inf, ...) {
     mean_prop <- mean(prop, ...)
     var_prop <- var(prop, ...)
@@ -107,16 +105,16 @@
 #' @param object a \code{\link[PhIPData]{PhIPData}} object.
 #' @param offsets vector defining the offset to use when the mean and/or
 #' variance are zero.
-#' @param lower lowerbound for the shape parameters.
+#' @param lower lower bound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
 #' @param ... parameters passed to \code{[base::mean]} and
 #' \code{[stats::var]}.
 #'
 #' @return a data frame with MOM estimates of a, b
-.getAB_MOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
+.getABMOM <- function(object, offsets = c(mean = 1e-8, var = 1e-8),
     lower = 1, upper = Inf, ...) {
     prop_dat <- PhIPData::propReads(object)
-    params <- apply(prop_dat, 1, .getAB_MOM_prop,
+    params <- apply(prop_dat, 1, .getABMOMProp,
         offsets = offsets,
         lower = lower, upper = upper, ...
     )
@@ -130,7 +128,7 @@
 #' @param prop vector of proportions.
 #' @param prop.offset offset to use when the proportion of reads is 0.
 #' @param optim.method optimization method passed to \code{[stats::optim]}.
-#' @param lower lowerbound for the shape parameters.
+#' @param lower lower bound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
 #'
 #' @return a data frame of MLE estimates of a, b
@@ -139,14 +137,14 @@
 #'
 #' @import PhIPData
 #' @importFrom stats dbeta optim
-.getAB_MLE_prop <- function(prop, prop.offset = 1e-8, optim.method = "default",
+.getABMLEProp <- function(prop, prop.offset = 1e-8, optim.method = "default",
     lower = 1, upper = Inf) {
 
     ## Add small offset when the proportion equals to 0
     prop <- prop + prop.offset * (prop == 0)
 
     ## Use MOM as initial values
-    start <- .getAB_MOM_prop(prop)
+    start <- .getABMOMProp(prop)
 
     optim.method <- if (optim.method == "default") {
         optim.method <- "L-BFGS-B"
@@ -177,17 +175,17 @@
 #' @param object a \code{\link[PhIPData]{PhIPData}} object
 #' @param prop.offset offset to use when the proportion of reads is 0.
 #' @param optim.method optimization method passed to \code{[stats::optim]}.
-#' @param lower lowerbound for the shape parameters.
+#' @param lower lower bound for the shape parameters.
 #' @param upper upper bound for the shape parameters.
 #'
 #' @return a data frame of MLE estimates of a, b
 #'
 #' @seealso \code{[stats::optim]} for available optimization methods
-.getAB_MLE <- function(object, prop.offset = 1e-8, optim.method = "default",
+.getABMLE <- function(object, prop.offset = 1e-8, optim.method = "default",
     lower = 1, upper = Inf) {
     prop_dat <- propReads(object)
 
-    params <- apply(prop_dat, 1, .getAB_MLE_prop,
+    params <- apply(prop_dat, 1, .getABMLEProp,
         prop.offset = prop.offset,
         optim.method = optim.method, lower = lower, upper = upper
     )
@@ -199,7 +197,7 @@
 #' Estimate beads-only shape parameters
 #'
 #' @description Beta shape parameters are estimated using the proportion of
-#' reads-pulled per petide across the beads-only samples. Currently, only three
+#' reads-pulled per peptide across the beads-only samples. Currently, only three
 #' estimation methods are supported: edgeR, method of moments (MOM),
 #' maximum likelihood (MLE). Note that edgeR can only be used on
 #' \code{\link[PhIPData]{PhIPData}} objects while MOM and MLE methods can also
@@ -231,7 +229,7 @@
 #' \itemize{
 #'     \item \code{offsets}: vector defining the offset to use when the mean
 #'     and/or variance are zero.
-#'     \item \code{lower}: lowerbound for the shape parameters.
+#'     \item \code{lower}: lower bound for the shape parameters.
 #'     \item \code{upper}: upper bound for the shape parameters.
 #'     \item \code{...}: parameters passed to \code{[base::mean]} and
 #'     \code{[stats::var]}.
@@ -247,7 +245,7 @@
 #'      is 0.
 #'      \item \code{optim.method}: optimization method passed to
 #'      \code{[stats::optim]}.
-#'      \item \code{lower}: lowerbound for the shape parameters.
+#'      \item \code{lower}: lower bound for the shape parameters.
 #'      \item \code{upper}: upper bound for the shape parameters.
 #' }
 #'
@@ -295,19 +293,19 @@ getAB <- function(object, method = "mom", ...) {
         }
 
         if (method == "mle") {
-            .getAB_MLE_prop(object, ...)
+            .getABMLEProp(object, ...)
         } else if (method == "mom") {
-            .getAB_MOM_prop(object, ...)
+            .getABMOMProp(object, ...)
         } else {
             stop("edgeR is not a valid method for vectors.")
         }
     } else if (is(object, "PhIPData")) {
         if (method == "mom") {
-            .getAB_MOM(object, ...)
+            .getABMOM(object, ...)
         } else if (method == "mle") {
-            .getAB_MLE(object, ...)
+            .getABMLE(object, ...)
         } else {
-            .getAB_edgeR(object, ...)
+            .getABEdgeR(object, ...)
         }
     } else {
         stop(

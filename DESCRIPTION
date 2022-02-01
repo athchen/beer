@@ -33,25 +33,19 @@ Imports:
     utils
 Suggests: 
     testthat (>= 3.0.0),
-    BiocStyle, 
+    BiocStyle,
     covr,
     knitr,
-    rmarkdown, 
-    dplyr, 
-    ggplot2
+    rmarkdown,
+    dplyr,
+    ggplot2,
+    spelling
 SystemRequirements:
     JAGS (4.3.0)
 biocViews: Software, StatisticalMethod, Bayesian, Sequencing, Coverage
+URL: https://github.com/athchen/beer/
 BugReports: https://github.com/athchen/beer/issues
-Collate:
-    'beadsRR.R'
-    'summarizeRun.R'
-    'utils.R'
-    'edgeR.R'
-    'getAB.R'
-    'brew.R'
-    'guessEnriched.R'
-    'guessInits.R'
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 RoxygenNote: 7.1.2
+Language: en-US

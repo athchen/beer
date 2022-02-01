@@ -10,7 +10,7 @@
 #' indicating which peptides are considered super-enriched.
 #'
 #' @import PhIPData SummarizedExperiment
-.guessEnriched_edgeR <- function(object, threshold = 15, fc.name = "logfc") {
+.guessEnrichedEdgeR <- function(object, threshold = 15, fc.name = "logfc") {
 
     ## Check that assay is present
     if (!fc.name %in% assayNames(object)) {
@@ -21,7 +21,7 @@
     if (all(is.na(assay(object, fc.name)))) {
         stop(
             fc.name, " is empty. edgeR estimated fold-changes can be ",
-            "added to the object using the `edgeR()` function."
+            "added to the object using the `runEdgeR()` function."
         )
     }
 
@@ -40,7 +40,7 @@
 #'
 #' @import PhIPData
 #' @importFrom stats coef lm
-.guessEnriched_MLE <- function(object, threshold = 15, beads.prior) {
+.guessEnrichedMLE <- function(object, threshold = 15, beads.prior) {
     n <- librarySize(object)
 
     ## Calculate expected proportion of reads pulled based on beads-only samples
@@ -131,7 +131,7 @@
 #'
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
-#' edgeR_out <- edgeR(sim_data)
+#' edgeR_out <- runEdgeR(sim_data)
 #'
 #' guessEnriched(edgeR_out, method = "edgeR", threshold = 15, fc.name = "logfc")
 #' guessEnriched(edgeR_out,
@@ -141,9 +141,9 @@
 #' @export
 guessEnriched <- function(object, method = "mle", ...) {
     if (method == "mle") {
-        .guessEnriched_MLE(object, ...)
+        .guessEnrichedMLE(object, ...)
     } else if (method == "edgeR") {
-        .guessEnriched_edgeR(object, ...)
+        .guessEnrichedEdgeR(object, ...)
     } else {
         stop("Invalid method. Valid methods include 'mle' and 'edgeR'")
     }

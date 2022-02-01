@@ -1,6 +1,3 @@
-#' @include utils.R beadsRR.R getAB.R summarizeRun.R
-NULL
-
 #' Clean up inputs for prior estimation
 #'
 #' Tidy inputs related to `prior.parameters`. Supplies default values for
@@ -198,7 +195,7 @@ NULL
 #' @param n.iter number of iterations for the MCMC chain to run (after n.adapt)
 #' @param thin thinning parameter
 #' @param na.rm what to do with NA values (for JAGS)
-#' @param ... extra params for JAGS
+#' @param ... extra parameters for JAGS
 #' @param seed number/string for reproducibility purposes.
 #'
 #' @return nothing, saves the the results to an RDS in either a temp directory
@@ -208,7 +205,7 @@ NULL
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 #'
 #' beads_prior <- getAB(subsetBeads(sim_data), "edgeR")
-#' .brew_one(sim_data, "9", list(
+#' brewOne(sim_data, "9", list(
 #'     a_0 = beads_prior[["a_0"]],
 #'     b_0 = beads_prior[["b_0"]],
 #'     a_pi = 2, b_pi = 300,
@@ -220,7 +217,7 @@ NULL
 #' @import PhIPData
 #' @importFrom rjags coda.samples
 #' @importFrom utils capture.output
-.brew_one <- function(object, sample, prior.params,
+brewOne <- function(object, sample, prior.params,
     n.chains = 1, n.adapt = 1e3,
     n.iter = 1e4, thin = 1, na.rm = TRUE, ...,
     seed = as.numeric(format(Sys.Date(), "%Y%m%d"))) {
@@ -273,8 +270,8 @@ NULL
 #' (2) make sure the cli output colors don't change.
 #'
 #' @param object PhIPData object
-#' @param sample_id vector of sample IDs to iterate over
-#' @param beads_id vector of IDs corresponding to beads-only samples
+#' @param sample.id vector of sample IDs to iterate over
+#' @param beads.id vector of IDs corresponding to beads-only samples
 #' @param se.matrix matrix indicating which peptides are clearly enriched
 #' @param prior.params list of prior parameters
 #' @param beads.prior data frame of beads-only prior parameters
@@ -284,24 +281,24 @@ NULL
 #' @param tmp.dir directory to store JAGS samples
 #'
 #' @return vector of process id's for internal checking of whether functions
-#' were parallized correctly.
+#' were parallelized correctly.
 #'
 #' @import PhIPData
-.brew_samples <- function(object, sample_id, beads_id, se.matrix,
+.brewSamples <- function(object, sample.id, beads.id, se.matrix,
     prior.params, beads.prior, beads.args, jags.params,
     tmp.dir) {
     progressr::handlers("txtprogressbar")
-    p <- progressr::progressor(along = sample_id)
+    p <- progressr::progressor(along = sample.id)
 
-    jags_out <- future.apply::future_lapply(sample_id, function(sample) {
+    jags_out <- future.apply::future_lapply(sample.id, function(sample) {
         sample_counter <- paste0(
-            which(sample_id == sample), " of ",
-            length(sample_id)
+            which(sample.id == sample), " of ",
+            length(sample.id)
         )
         p(sample_counter, class = "sticky", amount = 1)
 
         ## Subset super-enriched and only single sample
-        one_sample <- object[!se.matrix[, sample], c(beads_id, sample)]
+        one_sample <- object[!se.matrix[, sample], c(beads.id, sample)]
 
         ## Calculate new beads-only priors
         new_beads <- if (prior.params$method == "custom") {
@@ -327,7 +324,7 @@ NULL
             )]
         )
 
-        jags_run <- do.call(.brew_one, c(
+        jags_run <- do.call(brewOne, c(
             list(
                 object = one_sample,
                 sample = sample,
@@ -337,7 +334,7 @@ NULL
             jags.params
         ))
 
-        saveRDS(jags_run, paste0(tmp.dir, "/", sample, ".rds"))
+        saveRDS(jags_run, file.path(tmp.dir, paste0(sample, ".rds")))
 
         Sys.getpid()
     })
@@ -513,9 +510,9 @@ brew <- function(object,
 
     ## Create temporary directory for output of JAGS models
     tmp.dir <- if (is.null(sample.dir)) {
-        paste0(
-            tempdir(), "/beer_run",
-            as.numeric(format(Sys.Date(), "%Y%m%d"))
+        file.path(
+            tempdir(),
+            paste0("beer_run",as.numeric(format(Sys.Date(), "%Y%m%d")))
         )
     } else {
         normalizePath(sample.dir, mustWork = FALSE)
@@ -523,7 +520,7 @@ brew <- function(object,
 
     # Check if any sample files exist
     samples_run <- if (beadsRR) c(beads_id, sample_id) else sample_id
-    samples_files <- paste0(tmp.dir, "/", samples_run, ".rds")
+    samples_files <- file.path(tmp.dir, paste0(samples_run, ".rds"))
     if (any(file.exists(samples_files))) {
         cli::cli_alert_warning(
             paste0(
@@ -578,7 +575,7 @@ brew <- function(object,
 
     cli::cli_text("Sample runs")
     progressr::with_progress({
-        pids <- .brew_samples(
+        pids <- .brewSamples(
             object, sample_id, beads_id, se.matrix,
             prior.params, beads.prior, beads.args,
             jags.params, tmp.dir

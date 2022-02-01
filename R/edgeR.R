@@ -34,19 +34,32 @@
 
 #' Run edgeR for one sample against all the beads-only samples.
 #'
+#' This function is not really for external use. It's exported for
+#' parallelization purposes. For more detailed descriptions see
+#' \code{\link{runEdgeR}}.
+#'
 #' @param object \code{\link[PhIPData]{PhIPData}} object
 #' @param sample sample name of the sample to compare against beads-only samples
 #' @param beads sample names for beads-only samples
-#' @param common.disp edgeR estimated common disperion parameter
+#' @param common.disp edgeR estimated common dispersion parameter
 #' @param tagwise.disp edgeR estimated tagwise dispersion parameter
 #' @param trended.disp edgeR estimated trended dispersion parameter
 #'
 #' @return list with sample name, log2 fc estimate, and log10 p-value
 #'
+#' @examples
+#' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
+#'
+#' beads_disp <- beer:::.edgeRBeads(sim_data)
+#' edgeROne(sim_data, "9", colnames(sim_data)[sim_data$group == "beads"],
+#'     beads_disp$common.dispersion, beads_disp$tagwise.disp,
+#'     beads_disp$trended.disp)
+#'
+#' @export
 #' @importFrom edgeR exactTest
 #' @importFrom methods as
 #' @import PhIPData
-.edgeR_one <- function(object, sample, beads,
+edgeROne <- function(object, sample, beads,
     common.disp, tagwise.disp, trended.disp) {
     ## Coerce into edgeR object
     ## Set common dispersion to disp estimated from beads-only samples
@@ -94,16 +107,16 @@
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 #'
 #' ## Sequential evaluation
-#' edgeR(sim_data)
+#' runEdgeR(sim_data)
 #'
 #' ## Multisession evaluation
-#' edgeR(sim_data, parallel = "multisession")
+#' runEdgeR(sim_data, parallel = "multisession")
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData SummarizedExperiment
 #' @export
-edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
+runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob"),
     beadsRR = FALSE,
     parallel = "sequential") {
@@ -184,7 +197,7 @@ edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     beads_names <- colnames(object[, object$group == getBeadsName()])
 
     output <- future.apply::future_lapply(sample_names, function(sample) {
-        .edgeR_one(
+        edgeROne(
             object, sample, beads_names,
             common_disp, tagwise_disp, trended_disp
         )

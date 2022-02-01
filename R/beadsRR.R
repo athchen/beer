@@ -13,14 +13,14 @@
 #' MCMC output and cleaned afterwards.
 #' @param assay.names named vector indicating where MCMC results should be
 #' stored in the PhIPData object
-#' @param summarize logical indicating whehter to return a PhIPData object.
+#' @param summarize logical indicating whether to return a PhIPData object.
 #'
 #' @return vector of process IDs or a PhIPData object
 #'
 #' @import PhIPData
 #' @importFrom future.apply future_lapply
 #' @importFrom progressr handlers progressor
-.beadsRR_beer <- function(object,
+.beadsRRBeer <- function(object,
     prior.params = list(
         method = "edgeR",
         a_pi = 2, b_pi = 300,
@@ -54,9 +54,9 @@
 
     ## Create temporary directory for output of JAGS models
     tmp.dir <- if (is.null(sample.dir)) {
-        paste0(
-            tempdir(), "/beer_run",
-            as.numeric(format(Sys.Date(), "%Y%m%d"))
+        file.path(
+            tempdir(),
+            paste0("beer_run", as.numeric(format(Sys.Date(), "%Y%m%d")))
         )
     } else {
         normalizePath(sample.dir, mustWork = FALSE)
@@ -64,7 +64,7 @@
 
     ## Check if any sample files exist
     beads_id <- colnames(object[, object$group == getBeadsName()])
-    if (any(file.exists(paste0(tmp.dir, "/", beads_id, ".rds")))) {
+    if (any(file.exists(file.path(tmp.dir, paste0(beads_id, ".rds"))))) {
         cli::cli_alert_warning(
             paste0(
                 "Sample files already exist in the specified directory. ",
@@ -113,7 +113,7 @@
             )]
         )
 
-        jags_run <- do.call(.brew_one, c(
+        jags_run <- do.call(brewOne, c(
             list(
                 object = one_beads,
                 sample = sample,
@@ -122,13 +122,13 @@
             jags.params
         ))
 
-        saveRDS(jags_run, paste0(tmp.dir, "/", sample, ".rds"))
+        saveRDS(jags_run, file.path(tmp.dir, paste0(sample, ".rds")))
 
         Sys.getpid()
     })
 
     if (summarize) {
-        out <- summarizeRun(object, paste0(tmp.dir, "/", beads_id, ".rds"),
+        out <- summarizeRun(object, file.path(tmp.dir, paste0(beads_id, ".rds")),
             matrix(FALSE, nrow(object), ncol(object),
                 dimnames = dimnames(object)
             ),
@@ -165,7 +165,7 @@
 #'
 #' @import PhIPData SummarizedExperiment
 #' @importFrom future.apply future_lapply
-.beadsRR_edgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
+.beadsRREdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob")) {
 
     ## Set-up output matrices ----------
@@ -200,7 +200,7 @@
         trended_disp <- edgeR_beads$trended.dispersion
 
         ## Run edgeR for the one beads-only sample ------------
-        .edgeR_one(
+        edgeROne(
             one_beads, sample, beads_names[beads_names != sample],
             common_disp, tagwise_disp, trended_disp
         )
@@ -254,7 +254,7 @@
 #' @return a PhIPData object
 #'
 #' @seealso \code{\link{brew}} for BEER parameters, \code{\link{edgeR}} for
-#' edgeR parameters, and \code{[future::plan]} for parallization.
+#' edgeR parameters, and \code{[future::plan]} for parallelization.
 #'
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
@@ -266,8 +266,8 @@ beadsRR <- function(object, method, ...) {
     if (!method %in% c("edgeR", "beer")) {
         stop("Invalid specified method for beads-only round robin.")
     } else if (method == "edgeR") {
-        .beadsRR_edgeR(object, ...)
+        .beadsRREdgeR(object, ...)
     } else {
-        .beadsRR_beer(object, ...)
+        .beadsRRBeer(object, ...)
     }
 }

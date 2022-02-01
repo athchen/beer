@@ -15,7 +15,7 @@ approaches for identifying peptide enrichments.
 The first approach is based on
 [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html)’s
 standard pipeline for identifying differential expression from read
-count data. Though
+count data[^1][^2][^3]. Though
 [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
 is remarkably effective at quickly identifying enriched antibody
 responses, it is less likely to pick up enriched peptides at the lower
@@ -23,14 +23,14 @@ fold-change range.
 
 The second approach, Bayesian Estimation in R (BEER) was developed
 specifically for the PhIP-seq setting and implements a Bayesian model to
-identify peptide enrichments as described in Chen et. al[^1]. Though
+identify peptide enrichments as described in Chen et. al[^4]. Though
 BEER is more likely to identify enriched peptides at the lower
 fold-change range, it tends to take much longer to run.
 
 Below we give a brief overview of the two approaches. For more
-information, see the vignette [Estimating Antibody Enrichment in
-PhIP-Seq Experiments with BEER](addurl). Both methods can be run in
-synchronously or asynchronously as supported by
+information, see the package vignette using `browseVignettes("beer")`.
+Both methods can be run in synchronously or asynchronously as supported
+by
 [`future`](https://cran.r-project.org/web/packages/future/index.html).
 
 ## Installation
@@ -54,19 +54,10 @@ Once JAGS has been installed,
 [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html) can
 be installed in `R` via `install.packages("rjags")`.
 
-### `PhIPData`
-
-Additionally, `beer` requires `PhIPData` with a version greater than
-1.1.0. We recommend installing `PhIPData` from Github,
-
-``` r
-devtools::install_github("athchen/PhIPData")
-```
-
 ### `beer`
 
-Once `rjags` and `PhIPData` have been installed, the stable release
-version of `beer` in Bioconductor can be installed using `BiocManager`:
+Once `rjags` has been installed, the stable release version of `beer` in
+Bioconductor can be installed using `BiocManager`:
 
 ``` r
 if (!require("BiocManager"))
@@ -89,13 +80,13 @@ peptides. Thus, to identify enriched peptides, we can run the standard
 [`edgeR`](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
 pipeline for differential expression.
 
-The `edgeR()` function estimates peptide-specific dispersion parameters
-then runs the exact test proposed by Robinson and Smyth[^2] for the
-difference in mean between two groups of negative binomial random
-variables. Since peptides are enriched only if average proportion of
-reads pulled in the serum sample is higher than the average proportion
-of reads pulled in a beads-only samples, two-sided p-values are
-converted to one-sided p-values.
+The `runEdgeR()` function estimates peptide-specific dispersion
+parameters then runs the exact test proposed by Robinson and Smyth[^5]
+for the difference in mean between two groups of negative binomial
+random variables. Since peptides are enriched only if average proportion
+of reads pulled in the serum sample is higher than the average
+proportion of reads pulled in a beads-only samples, two-sided p-values
+are converted to one-sided p-values.
 
 ``` r
 ## Load data
@@ -104,7 +95,7 @@ sim_data <- readRDS(data_path)
 ```
 
 ``` r
-edgeR_out <- edgeR(sim_data, 
+edgeR_out <- runEdgeR(sim_data, 
                    assay.names = c(logfc = "edgeR_logfc", 
                                    prob = "edgeR_logpval"))
 ```
@@ -140,7 +131,7 @@ follows:
     super enriched peptides are first excluded as these peptides should
     always have posterior probabilities of enrichment of 1.
 3.  **Re-estimate beads-only prior parameters.** Prior parameters are
-    then reestimated from the beads-only samples for the remaining
+    then re-estimated from the beads-only samples for the remaining
     peptides.
 4.  **Initialize and run the MCMCs.** To reduce convergence time, MLE
     estimates are used to initialize the MCMC sampler, and samples are
@@ -197,14 +188,14 @@ beads-only samples against all other beads-only samples. This beads-only
 round robin also provides a sense of how similar the beads-only samples
 are to each other.
 
-The beads-only round robin can be included in `brew()` and `edgeR()` by
-specifying `beadsRR = TRUE`.
+The beads-only round robin can be included in `brew()` and `runEdgeR()`
+by specifying `beadsRR = TRUE`.
 
 ``` r
 ## edgeR with beadsRR
-edgeR_beadsRR <- edgeR(sim_data, beadsRR = TRUE, 
-                       assay.names = c(logfc = "edgeR_logfc", 
-                                       prob = "edgeR_logpval"))
+edgeR_beadsRR <- runEdgeR(sim_data, beadsRR = TRUE, 
+                          assay.names = c(logfc = "edgeR_logfc", 
+                                          prob = "edgeR_logpval"))
 ## Calculate hits
 assay(edgeR_beadsRR, "edgeR_hits") <- apply(
   assay(edgeR_beadsRR, "edgeR_logpval"), 2, 
@@ -259,12 +250,25 @@ colSums(assay(edgeR_beadsRR, "edgeR_hits"))
 
 ## References
 
-[^1]: Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I. Detecting
+[^1]: Robinson MD, McCarthy DJ and Smyth GK (2010). edgeR: a
+    Bioconductor package for differential expression analysis of digital
+    gene expression data. Bioinformatics 26, 139-140
+
+[^2]: McCarthy DJ, Chen Y and Smyth GK (2012). Differential expression
+    analysis of multifactor RNA-Seq experiments with respect to
+    biological variation. Nucleic Acids Research 40, 4288-4297
+
+[^3]: Chen Y, Lun ATL, Smyth GK (2016). From reads to genes to pathways:
+    differential expression analysis of RNA-Seq experiments using
+    Rsubread and the edgeR quasi-likelihood pipeline. F1000Research 5,
+    1438
+
+[^4]: Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I. Detecting
     antibody reactivities in phage immunoprecipitation sequencing data
     (2022). *bioRxiv*.
     <https://www.biorxiv.org/content/10.1101/2022.01.19.476926v1>
 
-[^2]: Robinson MD and Smyth GK. Small-sample estimation of negative
+[^5]: Robinson MD and Smyth GK. Small-sample estimation of negative
     binomial dispersion, with applications to SAGE data (2008).
     *Biostatistics*, 9, 321-332.
     <https://doi.org/10.1093/biostatistics/kxm030>

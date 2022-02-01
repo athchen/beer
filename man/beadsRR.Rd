@@ -52,5 +52,5 @@ beadsRR(sim_data, method = "edgeR")
 }
 \seealso{
 \code{\link{brew}} for BEER parameters, \code{\link{edgeR}} for
-edgeR parameters, and \code{[future::plan]} for parallization.
+edgeR parameters, and \code{[future::plan]} for parallelization.
 }

@@ -36,5 +36,5 @@ Briefly initial values are defined as follows:
 }
 }
 \seealso{
-\emph{Appendix} in the Chen et. al 2022
+\emph{Methods} in [Chen et. al 2022](https://www.biorxiv.org/content/10.1101/2022.01.19.476926v1)
 }
