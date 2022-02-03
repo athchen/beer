@@ -94,32 +94,34 @@ edgeROne <- function(object, sample, beads,
 #' first and second entries are used as defaults
 #' @param beadsRR logical value specifying whether each beads-only sample
 #' should be compared to all other beads-only samples.
-#' @param parallel character indicating which parallelization strategy to use.
-#' Alternatively, a named list of parameters available in
-#' \code{[future::plan]}.
+#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' BiocParallel functions.
 #'
 #' @return PhIPData object with log2 estimated fold-changes and p-values for
 #' enrichment stored in the assays specified by `assay.names`.
 #'
-#' @seealso \code{[future::plan]}, \code{\link{beadsRR}}
+#' @seealso \code{[BiocParallel::BiocParallelParam]}, \code{\link{beadsRR}}
 #'
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 #'
-#' ## Sequential evaluation
+#' ## Default back-end evaluation
 #' runEdgeR(sim_data)
 #'
-#' ## Multisession evaluation
-#' runEdgeR(sim_data, parallel = "multisession")
-#' @importFrom future.apply future_lapply
-#' @importFrom future plan
+#' ## Serial
+#' runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+#'
+#' ## Snow
+#' runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+#'
+#' @importFrom BiocParallel bplapply bpparam
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData SummarizedExperiment
 #' @export
 runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob"),
     beadsRR = FALSE,
-    parallel = "sequential") {
+    bp.param = BiocParallel::bpparam()) {
 
     # Add names to assay.names vector
     if (is.null(names(assay.names))) {
@@ -128,13 +130,6 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     ## Check for unnamed vectors or missing names
     if (is.na(assay.names["logfc"])) assay.names[["logfc"]] <- "logfc"
     if (is.na(assay.names["prob"])) assay.names[["prob"]] <- "prob"
-
-    ## Tidy parallelization inputs
-    parallel <- .tidyParallel(parallel)
-    ## Define plan and return current plan to oplan
-    oplan <- do.call(plan, parallel)
-    ## Rest to original plan on exit
-    on.exit(plan(oplan))
 
     edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
     common_disp <- edgeR_beads$common.dispersion
@@ -168,7 +163,7 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
 
     ## Do beadsRR if necessary
     if (beadsRR) {
-        object <- beadsRR(object,
+        object <- beadsRR(object, bp.param = bp.param,
             method = "edgeR",
             threshold.cpm, threshold.prevalence, assay.names
         )
@@ -196,12 +191,12 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     sample_names <- colnames(object[, object$group != getBeadsName()])
     beads_names <- colnames(object[, object$group == getBeadsName()])
 
-    output <- future.apply::future_lapply(sample_names, function(sample) {
+    output <- BiocParallel::bplapply(sample_names, function(sample) {
         edgeROne(
             object, sample, beads_names,
             common_disp, tagwise_disp, trended_disp
         )
-    })
+    }, BPPARAM = bp.param)
 
     # Unnest output items
     for (result in output) {

@@ -1,0 +1,19 @@
+citHeader("To cite beer in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Detecting Antibody Reactivities in Phage ImmunoPrecipitation Sequencing Data",
+  author   = personList(as.person("Athena Chen"),
+                        as.person("Kai Kammers"),
+                        as.person("H. Benjamin Larman"),
+                        as.person("Robert B. Scharpf"),
+                        as.person("Ingo Ruczinski")),
+  journal  = "bioRxiv",
+  year     = "2022",
+  url      = "https://www.biorxiv.org/content/early/2022/01/21/2022.01.19.476926",
+  textVersion = paste("Chen A, Kammers K, Larman HB, Scharpf R, Ruczinski I.",
+                "Detecting antibody reactivities in phage immunoprecipitation",
+                "sequencing data (2022). bioRxiv.",
+                "https://www.biorxiv.org/content/10.1101/2022.01.19.476926v1"
+  )
+)

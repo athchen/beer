@@ -24,8 +24,7 @@ Depends:
 Imports:
     cli, 
     edgeR,
-    future, 
-    future.apply,
+    BiocParallel,
     methods, 
     progressr,
     stats,

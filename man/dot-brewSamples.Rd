@@ -13,7 +13,8 @@
   beads.prior,
   beads.args,
   jags.params,
-  tmp.dir
+  tmp.dir,
+  bp.param
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ prior parameters (a_0, b_0)}
 \item{jags.params}{list of JAGS parameters}
 
 \item{tmp.dir}{directory to store JAGS samples}
+
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 }
 \value{
 vector of process id's for internal checking of whether functions

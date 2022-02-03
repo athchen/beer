@@ -310,15 +310,16 @@ colSums(beer_hits)
 
 # Parallelization
 
-By default, `beer` runs each sample sequentially. However, parallelization is also supported via [`future`](https://cran.r-project.org/web/packages/future/index.html) and [`future.apply`](https://cran.r-project.org/web/packages/future.apply/index.html) packages. Parallelization parameters are specified to both `brew()` and `runEdgeR()` via a character vector or a list of parameters passed to `future::plan()`. For more information on the available evaluation options, we highly recommend this [`future` vignette](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html). 
+By default, `beer` runs using the first registered back-end for parallelization as returned by `BiocParallel::bpparam()`. Other parallel evaluation environments are supported via the [`BiocParallel`](https://bioconductor.org/packages/release/bioc/html/BiocParallel.html) package (see the [BiocParallel vignette](https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Introduction_To_BiocParallel.pdf) for a list of possible parallelization environments). In both `brew()` and `runEdgeR`, the parallel environments are passed via the `bp.params` argument which takes a `BiocParallelParam` object. 
 
-```{r}
-## Run edgeR in parallel
-runEdgeR(sim_data, parallel = "multisession")
-runEdgeR(sim_data, parallel = list(strategy = "multisession", workers = 2))
+```{r, warning=FALSE}
+## Run edgeR using different parallel environments
+runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
 
 ## Run beer in parallel
-brew(sim_data, parallel = "multisession")
+brew(sim_data, bp.param = BiocParallel::SerialParam())
+brew(sim_data, bp.param = BiocParallel::SnowParam())
 ```
 
 # `sessionInfo()`

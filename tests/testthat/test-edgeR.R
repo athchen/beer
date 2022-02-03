@@ -21,21 +21,19 @@ cli::test_that_cli("warns when overwriting matrices", {
     expect_snapshot(runEdgeR(sim_data, assay.names = c("logfc", "counts")))
 })
 
-test_that("edgeR runs with multisession and sequential evaluation", {
-    curr_plan <- plan()
+test_that("edgeR runs with different BiocParallelParam classes", {
 
-    ## Sequential, check that current plan is properly reset
-    edgeR_seq <- runEdgeR(sim_data, parallel = "sequential")
-    expect_identical(plan(), curr_plan)
-
-    ## Multisession, check that current plan is properly reset
-    edgeR_multi <- runEdgeR(sim_data, parallel = "multisession")
-    expect_identical(plan(), curr_plan)
+    ## Serial
+    edgeR_ser <- runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+    ## Snow
+    suppressWarnings(
+        edgeR_snow <- runEdgeR(sim_data, bp.param = BiocParallel::SnowParam()))
 
     ## Check that there's nothing different
-    expect_identical(edgeR_seq, edgeR_multi)
+    expect_identical(edgeR_ser, edgeR_snow)
 })
 
 test_that("edgeR works with beadsRR", {
     expect_snapshot(runEdgeR(sim_data, beadsRR = TRUE))
 })
+

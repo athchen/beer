@@ -96,7 +96,7 @@ sim_data <- readRDS(data_path)
 
 ``` r
 edgeR_out <- runEdgeR(sim_data, 
-                   assay.names = c(logfc = "edgeR_logfc", 
+                      assay.names = c(logfc = "edgeR_logfc", 
                                    prob = "edgeR_logpval"))
 ```
 

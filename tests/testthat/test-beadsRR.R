@@ -10,34 +10,24 @@ test_that("beadsRR works with BEER", {
         method = "beer"
     ))
 
-    # Check that it works after changing plans
-    beadsRR_seq <- beadsRR(sim_data,
-        method = "beer",
-        jags.params = list(seed = 123),
-        summarize = FALSE
-    )
-    plan("multisession", workers = future::availableCores() - 1)
-    beadsRR_par <- beadsRR(sim_data,
-        method = "beer",
-        jags.params = list(seed = 123),
-        summarize = FALSE
-    )
-    expect_equal(length(unique(beadsRR_seq)), 1)
-    expect_equal(
-        unname(length(unique(beadsRR_par))),
-        unname(future::availableCores() - 1)
-    )
-
-    ## reset plan
-    plan("sequential")
+    ## Test parallelization
+    beer_ser <- beadsRR(sim_data,
+                        method = "beer",
+                        jags.params = list(seed = 123),
+                        bp.param = BiocParallel::SerialParam())
+    suppressWarnings(beer_snow <- beadsRR(sim_data, method = "beer",
+                                          jags.params = list(seed = 123),
+                                          bp.param = BiocParallel::SnowParam()))
+    expect_identical(beer_ser, beer_snow)
 })
 
 test_that("beadsRR works with edgeR", {
-    beadsRR_seq <- beadsRR(sim_data, method = "edgeR")
-    plan("multisession")
-    beadsRR_par <- beadsRR(sim_data, method = "edgeR")
-    expect_identical(beadsRR_seq, beadsRR_par)
+    expect_snapshot(beadsRR(sim_data, method = "edgeR"))
 
-    ## reset plan
-    plan("sequential")
+    ## Test parallelization
+    beadsRR_ser <- beadsRR(sim_data, method = "edgeR",
+                           bp.param = BiocParallel::SerialParam())
+    beadsRR_snow <- beadsRR(sim_data, method = "edgeR",
+                            bp.param = BiocParallel::SnowParam())
+    expect_identical(beadsRR_ser, beadsRR_snow)
 })

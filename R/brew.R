@@ -279,18 +279,21 @@ brewOne <- function(object, sample, prior.params,
 #' prior parameters (a_0, b_0)
 #' @param jags.params list of JAGS parameters
 #' @param tmp.dir directory to store JAGS samples
+#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' BiocParallel functions.
 #'
 #' @return vector of process id's for internal checking of whether functions
 #' were parallelized correctly.
 #'
 #' @import PhIPData
+#' @importMethodsFrom BiocParallel bplapply
 .brewSamples <- function(object, sample.id, beads.id, se.matrix,
     prior.params, beads.prior, beads.args, jags.params,
-    tmp.dir) {
+    tmp.dir, bp.param) {
     progressr::handlers("txtprogressbar")
     p <- progressr::progressor(along = sample.id)
 
-    jags_out <- future.apply::future_lapply(sample.id, function(sample) {
+    jags_out <- BiocParallel::bplapply(sample.id, function(sample) {
         sample_counter <- paste0(
             which(sample.id == sample), " of ",
             length(sample.id)
@@ -337,7 +340,7 @@ brewOne <- function(object, sample, prior.params,
         saveRDS(jags_run, file.path(tmp.dir, paste0(sample, ".rds")))
 
         Sys.getpid()
-    })
+    }, BPPARAM = bp.param)
 
     jags_out
 }
@@ -421,14 +424,13 @@ brewOne <- function(object, sample, prior.params,
 #' stored in the PhIPData object
 #' @param beadsRR logical value specifying whether each beads-only sample
 #' should be compared to all other beads-only samples.
-#' @param parallel character indicating which parallelization strategy to use.
-#' Alternatively, a named list of parameters available in
-#' \code{[future::plan]}.
+#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' BiocParallel functions.
 #'
 #' @return A PhIPData object with BEER results stored in the locations specified
 #' by \code{assay.names}.
 #'
-#' @seealso \code{[future::plan]} for parallelization options,
+#' @seealso \code{[BiocParallel::BiocParallelParam]} for subclasses,
 #' \code{\link{beadsRR}} for running each beads-only sample against all
 #' remaining samples, \code{\link{getAB}} for more information about valid
 #'  parameters for estimating beads-only prior parameters,
@@ -439,13 +441,16 @@ brewOne <- function(object, sample, prior.params,
 #' @examples
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 #'
-#' ## Sequential evaluation
+#' ## Default back-end evaluation
 #' brew(sim_data)
 #'
-#' ## Multisession evaluation
-#' brew(sim_data, parallel = "multisession")
-#' @importFrom future.apply future_lapply
-#' @importFrom future plan
+#' ## Serial
+#' brew(sim_data, bp.param = BiocParallel::SerialParam())
+#'
+#' ## Snow
+#' brew(sim_data, bp.param = BiocParallel::SnowParam())
+#'
+#' @importFrom BiocParallel bplapply
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData
 #'
@@ -475,7 +480,7 @@ brew <- function(object,
         c = "sampleInfo", pi = "sampleInfo"
     ),
     beadsRR = FALSE,
-    parallel = "sequential") {
+    bp.param = bpparam()) {
     .checkCounts(object)
 
     ## Check and tidy inputs
@@ -488,12 +493,6 @@ brew <- function(object,
     }
     jags.params <- .tidyInputsJAGS(jags.params)
     assay.names <- .tidyAssayNames(assay.names)
-    parallel <- .tidyParallel(parallel)
-
-    ## Define plan and return current plan to oplan
-    oplan <- do.call(plan, parallel)
-    ## Rest to original plan on exit
-    on.exit(plan(oplan))
 
     ## Get sample names
     beads_id <- colnames(object[, object$group == getBeadsName()])
@@ -567,6 +566,7 @@ brew <- function(object,
         progressr::with_progress({
             beads_pid <- beadsRR(subsetBeads(object),
                 method = "beer",
+                bp.param = bp.param,
                 prior.params, beads.args, jags.params,
                 tmp.dir, assay.names, FALSE
             )
@@ -578,7 +578,7 @@ brew <- function(object,
         pids <- .brewSamples(
             object, sample_id, beads_id, se.matrix,
             prior.params, beads.prior, beads.args,
-            jags.params, tmp.dir
+            jags.params, tmp.dir, bp.param
         )
     })
 
@@ -588,7 +588,8 @@ brew <- function(object,
         se.matrix,
         burn.in = jags.params$burn.in,
         post.thin = jags.params$post.thin,
-        assay.names
+        assay.names,
+        bp.param
     )
 
     ## Clean-up if necessary

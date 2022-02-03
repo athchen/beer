@@ -1,0 +1,29 @@
+Changes in version 0.99.1 (2022-01-31)
+=====================================
+
+Documentation
+
+* Corrected typos, formatting errors, and missing links.
+* Modified `DESCRIPTION` to include `URL` and remove `Collates`
+* Removed directions for installing `PhIPData` in the `README` and Vignette.
+* Added package citations for `edgeR`.
+* Added package man page.
+* Additional details have been added to the documentation for
+`phipseq_model.bugs`.
+* Added citation.
+
+Code
+
+* Standardized function names to use `camelCase`.
+* Standardized function arguments to use `dot.case`.
+* Though `edgeROne()` and `brewOne()` are not meant to be directly interfaced
+by the user, the two function names have been changed to reflect that they are
+still exported.
+* Renamed `edgeR()` to `runEdgeR()` to be more descriptive.
+* Corrected `paste0()` that should have been `file.path()`.
+* Converted to `BiocParallel` from `future` for parallelization support.
+
+Changes in version 0.99.0 (2022-01-13)
+=====================================
+
+Submitted to Bioconductor

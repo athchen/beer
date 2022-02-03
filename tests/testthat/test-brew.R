@@ -143,33 +143,29 @@ cli::test_that_cli("warns when overwriting sampleInfo", {
     sampleInfo(sim_data)[, c("c", "pi")] <- NULL
 })
 
-test_that("brew can run with multisession and sequential evaluation", {
-    curr_plan <- plan()
+test_that("brew can run with different BiocParallelParam classes", {
 
-    ## Sequential, check that current plan is properly reset
+    ## Serial
     ## Also check that files are saved in the right directory
     ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
     # if exists delete
-    if (dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
+    if (dir.exists(ex_dir)) unlink(ex_dir, recursive = TRUE)
     brew_seq <- brew(sim_data,
-        parallel = "sequential",
         sample.dir = ex_dir,
-        jags.params = list(seed = 123)
+        jags.params = list(seed = 123),
+        bp.param = BiocParallel::SerialParam()
     )
-    expect_identical(plan(), curr_plan)
     expect_equal(list.files(ex_dir), paste0(c(10, 5:9), ".rds"))
     # Clean directory
     unlink(ex_dir, recursive = TRUE)
 
-    ## Multisession, check that current plan is properly reset
-    brew_multi <- brew(sim_data,
-        parallel = "multisession",
-        jags.params = list(seed = 123)
-    )
-    expect_identical(plan(), curr_plan)
+    ## Snow
+    suppressWarnings(brew_snow <- brew(sim_data,
+                                     jags.params = list(seed = 123),
+                                     bp.param = BiocParallel::SnowParam()))
 
     ## Check that there's nothing different
-    expect_identical(brew_seq, brew_multi)
+    expect_identical(brew_seq, brew_snow)
 })
 
 test_that("brew works with beadsRR", {

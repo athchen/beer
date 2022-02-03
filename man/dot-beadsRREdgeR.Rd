@@ -8,7 +8,8 @@
   object,
   threshold.cpm = 0,
   threshold.prevalence = 0,
-  assay.names = c(logfc = "logfc", prob = "prob")
+  assay.names = c(logfc = "logfc", prob = "prob"),
+  bp.param = BiocParallel::bpparam()
 )
 }
 \arguments{
@@ -22,6 +23,9 @@
 \item{assay.names}{named vector specifying the assay names for the
 log2(fold-change) and exact test p-values. If the vector is not names,
 the first and second entries are used as defaults}
+
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 }
 \value{
 vector of process IDs

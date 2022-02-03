@@ -14,7 +14,8 @@
   sample.dir = NULL,
   assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob", c = "sampleInfo", pi =
     "sampleInfo"),
-  summarize = TRUE
+  summarize = TRUE,
+  bp.param = bpparam()
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ MCMC output and cleaned afterwards.}
 stored in the PhIPData object}
 
 \item{summarize}{logical indicating whether to return a PhIPData object.}
+
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 }
 \value{
 vector of process IDs or a PhIPData object

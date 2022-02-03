@@ -16,7 +16,7 @@ brew(
   assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob", c = "sampleInfo", pi =
     "sampleInfo"),
   beadsRR = FALSE,
-  parallel = "sequential"
+  bp.param = bpparam()
 )
 }
 \arguments{
@@ -42,9 +42,8 @@ stored in the PhIPData object}
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
 
-\item{parallel}{character indicating which parallelization strategy to use.
-Alternatively, a named list of parameters available in
-\code{[future::plan]}.}
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 }
 \value{
 A PhIPData object with BEER results stored in the locations specified
@@ -118,14 +117,18 @@ Valid exported estimates include,
 \examples{
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
-## Sequential evaluation
+## Default back-end evaluation
 brew(sim_data)
 
-## Multisession evaluation
-brew(sim_data, parallel = "multisession")
+## Serial
+brew(sim_data, bp.param = BiocParallel::SerialParam())
+
+## Snow
+brew(sim_data, bp.param = BiocParallel::SnowParam())
+
 }
 \seealso{
-\code{[future::plan]} for parallelization options,
+\code{[BiocParallel::BiocParallelParam]} for subclasses,
 \code{\link{beadsRR}} for running each beads-only sample against all
 remaining samples, \code{\link{getAB}} for more information about valid
  parameters for estimating beads-only prior parameters,

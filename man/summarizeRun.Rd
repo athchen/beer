@@ -10,7 +10,8 @@ summarizeRun(
   se.matrix,
   burn.in = 0,
   post.thin = 1,
-  assay.names
+  assay.names,
+  bp.param
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ super-enriched peptides}
 \item{post.thin}{thinning parameter}
 
 \item{assay.names}{named vector of specifying where to store point estimates}
+
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 }
 \value{
 PhIPData object with point estimates stored in the assays specified

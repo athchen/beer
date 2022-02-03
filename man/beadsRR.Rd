@@ -4,13 +4,16 @@
 \alias{beadsRR}
 \title{Beads-only round robin}
 \usage{
-beadsRR(object, method, ...)
+beadsRR(object, method, bp.param = BiocParallel::bpparam(), ...)
 }
 \arguments{
 \item{object}{PhIPData object}
 
 \item{method}{one of \code{'beer'} or \code{'edgeR'} specifying which method
 to use.}
+
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 
 \item{...}{parameters passed to the method specific functions. See the
 \emph{Details} section below for additional information.}
@@ -39,10 +42,6 @@ When \strong{\code{method == 'edgeR'}}, \code{threshold.cpm},
 \code{threshold.prevalence}, and \code{assay.names} are valid additional
 parameters that can be supplied to \code{beadsRR}. See \code{\link{edgeR}}
 for additional details on each of these parameters.
-
-If run as part of \code{\link{brew}} or \code{\link{edgeR}}, then
-parallelization is set by \code{parallel}. Otherwise the parallelization
-must be set before running \code{beadsRR} using \code{[future::plan]}.
 }
 \examples{
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
@@ -52,5 +51,6 @@ beadsRR(sim_data, method = "edgeR")
 }
 \seealso{
 \code{\link{brew}} for BEER parameters, \code{\link{edgeR}} for
-edgeR parameters, and \code{[future::plan]} for parallelization.
+edgeR parameters, and \code{[BiocParallel::BiocParallelParam]} for
+parallelization.
 }

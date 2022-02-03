@@ -10,7 +10,7 @@ runEdgeR(
   threshold.prevalence = 0,
   assay.names = c(logfc = "logfc", prob = "prob"),
   beadsRR = FALSE,
-  parallel = "sequential"
+  bp.param = BiocParallel::bpparam()
 )
 }
 \arguments{
@@ -28,9 +28,8 @@ first and second entries are used as defaults}
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
 
-\item{parallel}{character indicating which parallelization strategy to use.
-Alternatively, a named list of parameters available in
-\code{[future::plan]}.}
+\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+BiocParallel functions.}
 }
 \value{
 PhIPData object with log2 estimated fold-changes and p-values for
@@ -42,12 +41,16 @@ Run edgeR on PhIP-Seq data
 \examples{
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
-## Sequential evaluation
+## Default back-end evaluation
 runEdgeR(sim_data)
 
-## Multisession evaluation
-runEdgeR(sim_data, parallel = "multisession")
+## Serial
+runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+
+## Snow
+runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+
 }
 \seealso{
-\code{[future::plan]}, \code{\link{beadsRR}}
+\code{[BiocParallel::BiocParallelParam]}, \code{\link{beadsRR}}
 }

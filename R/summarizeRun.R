@@ -84,15 +84,18 @@ summarizeRunOne <- function(object, file, se.matrix,
 #' @param burn.in number of iterations to be burned
 #' @param post.thin thinning parameter
 #' @param assay.names named vector of specifying where to store point estimates
+#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' BiocParallel functions.
 #'
 #' @return PhIPData object with point estimates stored in the assays specified
 #' by `assay.names`.
 #'
 #' @importFrom progressr handlers progress
+#' @importFrom BiocParallel bplapply
 #' @import PhIPData SummarizedExperiment
 summarizeRun <- function(object, jags.files, se.matrix,
     burn.in = 0, post.thin = 1,
-    assay.names) {
+    assay.names, bp.param) {
 
     ## Check that all files are present
     if (!all(file.exists(jags.files))) {
@@ -153,18 +156,18 @@ summarizeRun <- function(object, jags.files, se.matrix,
     rownames(point_phi) <- rownames(point_phi_Z) <- rownames(point_Z) <-
         rownames(object)
 
-    ## Summarize each file, use future_lapply here to enable reading/import
+    ## Summarize each file, use bplapply here to enable reading/import
     ## to be parallelized
     progressr::handlers("txtprogressbar")
     p <- progressr::progressor(along = jags.files)
-    files_out <- future_lapply(jags.files, function(file) {
+    files_out <- bplapply(jags.files, function(file) {
         file_counter <- paste0(
             which(file == jags.files), " of ",
             length(jags.files)
         )
         p(file_counter, class = "sticky", amount = 1)
         summarizeRunOne(object, file, se.matrix, burn.in, post.thin)
-    })
+    }, BPPARAM = bp.param)
 
     for (out in files_out) {
         sample <- out$point_c$sample
