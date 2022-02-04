@@ -90,8 +90,8 @@
     } else {
         if (!"threshold" %in% names(se.params)) se.params$threshold <- 15
         if (!"beads.prior" %in% names(se.params)) {
-              se.params$beads.prior <- beads.prior
-          }
+            se.params$beads.prior <- beads.prior
+        }
 
         se.params[c("method", "threshold", "beads.prior")]
     }
@@ -449,7 +449,6 @@ brewOne <- function(object, sample, prior.params,
 #'
 #' ## Snow
 #' brew(sim_data, bp.param = BiocParallel::SnowParam())
-#'
 #' @importFrom BiocParallel bplapply
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData
@@ -511,7 +510,7 @@ brew <- function(object,
     tmp.dir <- if (is.null(sample.dir)) {
         file.path(
             tempdir(),
-            paste0("beer_run",as.numeric(format(Sys.Date(), "%Y%m%d")))
+            paste0("beer_run", as.numeric(format(Sys.Date(), "%Y%m%d")))
         )
     } else {
         normalizePath(sample.dir, mustWork = FALSE)

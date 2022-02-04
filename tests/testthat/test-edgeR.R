@@ -18,15 +18,14 @@ test_that("edgeR corrects for poorly specified assay.names", {
 })
 
 test_that("warns when overwriting matrices", {
-
     expect_true(
-        grepl("Values in the following assays will be overwritten: counts",
-              cli::cli_format_method(
-                  runEdgeR(sim_data, assay.names = c("logfc", "counts"))
-              )
+        grepl(
+            "Values in the following assays will be overwritten: counts",
+            cli::cli_format_method(
+                runEdgeR(sim_data, assay.names = c("logfc", "counts"))
+            )
         )
     )
-
 })
 
 test_that("edgeR runs with different BiocParallelParam classes", {
@@ -35,7 +34,8 @@ test_that("edgeR runs with different BiocParallelParam classes", {
     edgeR_ser <- runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
     ## Snow
     suppressWarnings(
-        edgeR_snow <- runEdgeR(sim_data, bp.param = BiocParallel::SnowParam()))
+        edgeR_snow <- runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+    )
 
     ## Check that there's nothing different
     expect_identical(edgeR_ser, edgeR_snow)
@@ -44,4 +44,3 @@ test_that("edgeR runs with different BiocParallelParam classes", {
 test_that("edgeR works with beadsRR", {
     expect_s4_class(runEdgeR(sim_data, beadsRR = TRUE), "PhIPData")
 })
-

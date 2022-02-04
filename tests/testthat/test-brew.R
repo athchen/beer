@@ -139,10 +139,11 @@ test_that("Assay names are correctly tidied", {
 test_that("warns when overwriting sampleInfo", {
     sim_data$c <- "overwrite"
     expect_true(any(
-        grepl("Values in the following assays will be overwritten: sampleInfo",
-              cli::cli_format_method(
-                  brew(sim_data, jags.params = list(seed = 123))
-              )
+        grepl(
+            "Values in the following assays will be overwritten: sampleInfo",
+            cli::cli_format_method(
+                brew(sim_data, jags.params = list(seed = 123))
+            )
         )
     ))
 
@@ -168,8 +169,9 @@ test_that("brew can run with different BiocParallelParam classes", {
 
     ## Snow
     suppressWarnings(brew_snow <- brew(sim_data,
-                                     jags.params = list(seed = 123),
-                                     bp.param = BiocParallel::SnowParam()))
+        jags.params = list(seed = 123),
+        bp.param = BiocParallel::SnowParam()
+    ))
 
     ## Check that there's nothing different
     expect_identical(brew_seq, brew_snow)

@@ -5,17 +5,22 @@ test_that("beadsRR only accepts two methods", {
 })
 
 test_that("beadsRR works with BEER", {
-    expect_s4_class(beadsRR(sim_data, jags.params = list(seed = 123),
-                            method = "beer"), "PhIPData")
+    expect_s4_class(beadsRR(sim_data,
+        jags.params = list(seed = 123),
+        method = "beer"
+    ), "PhIPData")
 
     ## Test parallelization
     beer_ser <- beadsRR(sim_data,
-                        method = "beer",
-                        jags.params = list(seed = 123),
-                        bp.param = BiocParallel::SerialParam())
-    suppressWarnings(beer_snow <- beadsRR(sim_data, method = "beer",
-                                          jags.params = list(seed = 123),
-                                          bp.param = BiocParallel::SnowParam()))
+        method = "beer",
+        jags.params = list(seed = 123),
+        bp.param = BiocParallel::SerialParam()
+    )
+    suppressWarnings(beer_snow <- beadsRR(sim_data,
+        method = "beer",
+        jags.params = list(seed = 123),
+        bp.param = BiocParallel::SnowParam()
+    ))
     expect_identical(beer_ser, beer_snow)
 })
 
@@ -23,9 +28,13 @@ test_that("beadsRR works with edgeR", {
     expect_s4_class(beadsRR(sim_data, method = "edgeR"), "PhIPData")
 
     ## Test parallelization
-    beadsRR_ser <- beadsRR(sim_data, method = "edgeR",
-                           bp.param = BiocParallel::SerialParam())
-    beadsRR_snow <- beadsRR(sim_data, method = "edgeR",
-                            bp.param = BiocParallel::SnowParam())
+    beadsRR_ser <- beadsRR(sim_data,
+        method = "edgeR",
+        bp.param = BiocParallel::SerialParam()
+    )
+    beadsRR_snow <- beadsRR(sim_data,
+        method = "edgeR",
+        bp.param = BiocParallel::SnowParam()
+    )
     expect_identical(beadsRR_ser, beadsRR_snow)
 })

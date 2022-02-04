@@ -51,10 +51,11 @@
 #' sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 #'
 #' beads_disp <- beer:::.edgeRBeads(sim_data)
-#' edgeROne(sim_data, "9", colnames(sim_data)[sim_data$group == "beads"],
+#' edgeROne(
+#'     sim_data, "9", colnames(sim_data)[sim_data$group == "beads"],
 #'     beads_disp$common.dispersion, beads_disp$tagwise.disp,
-#'     beads_disp$trended.disp)
-#'
+#'     beads_disp$trended.disp
+#' )
 #' @export
 #' @importFrom edgeR exactTest
 #' @importFrom methods as
@@ -113,7 +114,6 @@ edgeROne <- function(object, sample, beads,
 #'
 #' ## Snow
 #' runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
-#'
 #' @importFrom BiocParallel bplapply bpparam
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData SummarizedExperiment
@@ -163,7 +163,8 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
 
     ## Do beadsRR if necessary
     if (beadsRR) {
-        object <- beadsRR(object, bp.param = bp.param,
+        object <- beadsRR(object,
+            bp.param = bp.param,
             method = "edgeR",
             threshold.cpm, threshold.prevalence, assay.names
         )
