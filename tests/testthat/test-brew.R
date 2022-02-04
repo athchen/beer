@@ -136,11 +136,18 @@ test_that("Assay names are correctly tidied", {
     )
 })
 
-cli::test_that_cli("warns when overwriting sampleInfo", {
-    expect_snapshot(brew(sim_data, jags.params = list(seed = 123)))
+test_that("warns when overwriting sampleInfo", {
+    sim_data$c <- "overwrite"
+    expect_true(any(
+        grepl("Values in the following assays will be overwritten: sampleInfo",
+              cli::cli_format_method(
+                  brew(sim_data, jags.params = list(seed = 123))
+              )
+        )
+    ))
 
     ## Clean sampleInfo
-    sampleInfo(sim_data)[, c("c", "pi")] <- NULL
+    sampleInfo(sim_data)[, "c"] <- NULL
 })
 
 test_that("brew can run with different BiocParallelParam classes", {
@@ -169,18 +176,21 @@ test_that("brew can run with different BiocParallelParam classes", {
 })
 
 test_that("brew works with beadsRR", {
-    expect_snapshot({
-        brew(sim_data, jags.params = list(seed = 123), beadsRR = TRUE)
+    brew_rr <- brew(sim_data, jags.params = list(seed = 123), beadsRR = TRUE)
+    expect_s4_class(brew_rr, "PhIPData")
+})
 
-        ## Also check that files are saved in the right directory
-        ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
-        # if exists delete
-        if (dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
-        brew(sim_data,
-            jags.params = list(seed = 123),
-            sample.dir = ex_dir, beadsRR = TRUE
-        )
-        # Clean directory
-        unlink(ex_dir, recursive = TRUE)
-    })
+test_that("Files are saved to the correct directory", {
+    ## Also check that files are saved in the right directory
+    ex_dir <- paste0(system.file("extdata", package = "beer"), "/ex_dir")
+    # if exists delete
+    if (dir.exists(ex_dir)) unlink(ex_dir, recurive = TRUE)
+    brew(sim_data,
+        jags.params = list(seed = 123),
+        sample.dir = ex_dir, beadsRR = TRUE
+    )
+
+    expect_equal(length(list.files(ex_dir)), ncol(sim_data))
+    # Clean directory
+    unlink(ex_dir, recursive = TRUE)
 })

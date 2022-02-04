@@ -5,10 +5,8 @@ test_that("beadsRR only accepts two methods", {
 })
 
 test_that("beadsRR works with BEER", {
-    expect_snapshot(beadsRR(sim_data,
-        jags.params = list(seed = 123),
-        method = "beer"
-    ))
+    expect_s4_class(beadsRR(sim_data, jags.params = list(seed = 123),
+                            method = "beer"), "PhIPData")
 
     ## Test parallelization
     beer_ser <- beadsRR(sim_data,
@@ -22,7 +20,7 @@ test_that("beadsRR works with BEER", {
 })
 
 test_that("beadsRR works with edgeR", {
-    expect_snapshot(beadsRR(sim_data, method = "edgeR"))
+    expect_s4_class(beadsRR(sim_data, method = "edgeR"), "PhIPData")
 
     ## Test parallelization
     beadsRR_ser <- beadsRR(sim_data, method = "edgeR",
