@@ -11,7 +11,7 @@ set.seed(20210223)
 
 # Constants
 N <- 10
-P <- 50
+P <- 10
 B <- c(rep(1, 4), rep(0, 6))
 n <- round(abs(rnorm(N, 1.5e6, 1e5)))
 
@@ -22,22 +22,19 @@ beads_params <- beer::getAB(hiv, lower = 1) |>
     dplyr::arrange(mean)
 
 # Randomly select peptides
-pep_ind <- sort(sample(1:nrow(hiv), 50))
+pep_ind <- sort(sample(1:nrow(hiv), P))
 a_0 <- beads_params$a_0[pep_ind]
 b_0 <- beads_params$b_0[pep_ind]
 
 # proportion of peptides enriched
 Z <- cbind(matrix(0, nrow = P, ncol = sum(B)),
-           sapply(1:(N - sum(B)), function(x) sample(c(rep(1, 5), rep(0, 45)))))
+           sapply(1:(N - sum(B)), function(x) sample(c(1, rep(0, P-1)))))
 pi <- colMeans(Z)
 
 # fold-changes
 phi <- apply(Z, 2, function(x) {
     phi_j <- rep(1, P)
-    phi_cat <- as.vector(matrix(c(runif(1, 2, 4),
-                                  runif(1, 4, 8), runif(1, 8, 16),
-                                  runif(2, 16, 32)),
-                                nrow = 5, byrow = TRUE))
+    phi_cat <- runif(1, 2, 32)
     phi_j[which(x!= 0)] <- phi_cat
     phi_j
 })
