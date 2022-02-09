@@ -31,16 +31,16 @@
 #' Guess enriched peptides based on MLE estimates of the true fold-change
 #'
 #' @param object \code{\link[PhIPData]{PhIPData}} object.
+#' @param beads.prior data.frame of prior parameters for beads-only samples.
 #' @param threshold minimum estimated fc for a peptide to be considered
 #' super-enriched.
-#' @param beads.prior data.frame of prior parameters for beads-only samples.
 #'
 #' @return logical matrix of the with the same dimensions as \code{object}
 #' indicating which peptides are considered super-enriched.
 #'
 #' @import PhIPData
 #' @importFrom stats coef lm
-.guessEnrichedMLE <- function(object, threshold = 15, beads.prior) {
+.guessEnrichedMLE <- function(object, beads.prior, threshold = 15) {
     n <- librarySize(object)
 
     ## Calculate expected proportion of reads pulled based on beads-only samples
@@ -135,8 +135,9 @@
 #'
 #' guessEnriched(edgeR_out, method = "edgeR", threshold = 15, fc.name = "logfc")
 #' guessEnriched(edgeR_out,
-#'     method = "mle", threshold = 15,
-#'     beads.prior = getAB(edgeR_out, method = "edgeR")
+#'     method = "mle",
+#'     beads.prior = getAB(edgeR_out, method = "edgeR"),
+#'     threshold = 15
 #' )
 #' @export
 guessEnriched <- function(object, method = "mle", ...) {

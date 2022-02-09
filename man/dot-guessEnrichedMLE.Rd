@@ -4,15 +4,15 @@
 \alias{.guessEnrichedMLE}
 \title{Guess enriched peptides based on MLE estimates of the true fold-change}
 \usage{
-.guessEnrichedMLE(object, threshold = 15, beads.prior)
+.guessEnrichedMLE(object, beads.prior, threshold = 15)
 }
 \arguments{
 \item{object}{\code{\link[PhIPData]{PhIPData}} object.}
 
+\item{beads.prior}{data.frame of prior parameters for beads-only samples.}
+
 \item{threshold}{minimum estimated fc for a peptide to be considered
 super-enriched.}
-
-\item{beads.prior}{data.frame of prior parameters for beads-only samples.}
 }
 \value{
 logical matrix of the with the same dimensions as \code{object}

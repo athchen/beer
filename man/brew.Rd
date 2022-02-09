@@ -125,7 +125,6 @@ brew(sim_data, bp.param = BiocParallel::SerialParam())
 
 ## Snow
 brew(sim_data, bp.param = BiocParallel::SnowParam())
-
 }
 \seealso{
 \code{[BiocParallel::BiocParallelParam]} for subclasses,

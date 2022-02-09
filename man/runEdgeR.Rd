@@ -49,7 +49,6 @@ runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
 
 ## Snow
 runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
-
 }
 \seealso{
 \code{[BiocParallel::BiocParallelParam]}, \code{\link{beadsRR}}

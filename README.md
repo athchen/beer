@@ -31,7 +31,7 @@ Below we give a brief overview of the two approaches. For more
 information, see the package vignette using `browseVignettes("beer")`.
 Both methods can be run in synchronously or asynchronously as supported
 by
-[`future`](https://cran.r-project.org/web/packages/future/index.html).
+[`BiocParallel`](http://bioconductor.org/packages/release/bioc/html/BiocParallel.html).
 
 ## Installation
 
@@ -113,7 +113,7 @@ assay(edgeR_out, "edgeR_hits") <- apply(
 
 colSums(assay(edgeR_out, "edgeR_hits"))
 #>  1  2  3  4  5  6  7  8  9 10 
-#> NA NA NA NA  2  1  1  1  2  0
+#> NA NA NA NA  1  1  1  0  0  1
 ```
 
 ## BEER (Bayesian Estimation Enrichment in R)
@@ -178,7 +178,7 @@ assay(beer_out, "beer_hits") <- assay(beer_out, "beer_prob") > 0.5 | are_se
 
 colSums(assay(beer_out, "beer_hits"))
 #>  1  2  3  4  5  6  7  8  9 10 
-#> NA NA NA NA  5  7  3  3  3  2
+#> NA NA NA NA  3  1  1  1  0  1
 ```
 
 ## Beads-only round robin
@@ -207,7 +207,7 @@ assay(edgeR_beadsRR, "edgeR_hits") <- apply(
 ## Note samples 1-4 have 0 instead of NA now
 colSums(assay(edgeR_beadsRR, "edgeR_hits"))
 #>  1  2  3  4  5  6  7  8  9 10 
-#>  0  0  0  0  2  1  1  1  2  0
+#>  0  0  0  0  1  1  1  0  0  1
 ```
 
 ``` r
@@ -224,7 +224,7 @@ beer_hits <- assay(beer_beadsRR, "beer_prob") > 0.5 | are_se
 ## Note again that samples 1-4 are not NA 
 colSums(beer_hits)
 #>  1  2  3  4  5  6  7  8  9 10 
-#>  2  3  0  0  5  7  3  3  3  2
+#>  0  0  0  0  3  1  1  1  0  1
 ```
 
 Alternatively, one can run `beadsRR()` separately,

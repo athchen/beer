@@ -95,7 +95,11 @@ summarizeRunOne <- function(object, file, se.matrix,
 #' @import PhIPData SummarizedExperiment
 summarizeRun <- function(object, jags.files, se.matrix,
     burn.in = 0, post.thin = 1,
-    assay.names, bp.param) {
+    assay.names = c(
+        phi = NULL, phi_Z = "logfc", Z = "prob",
+        c = "sampleInfo", pi = "sampleInfo"
+    ),
+    bp.param = BiocParallel::bpparam()) {
 
     ## Check that all files are present
     if (!all(file.exists(jags.files))) {

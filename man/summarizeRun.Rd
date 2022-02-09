@@ -10,8 +10,9 @@ summarizeRun(
   se.matrix,
   burn.in = 0,
   post.thin = 1,
-  assay.names,
-  bp.param
+  assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob", c = "sampleInfo", pi =
+    "sampleInfo"),
+  bp.param = BiocParallel::bpparam()
 )
 }
 \arguments{

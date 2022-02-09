@@ -31,8 +31,9 @@ parallelization purposes. For more detailed descriptions see
 sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 
 beads_disp <- beer:::.edgeRBeads(sim_data)
-edgeROne(sim_data, "9", colnames(sim_data)[sim_data$group == "beads"],
+edgeROne(
+    sim_data, "9", colnames(sim_data)[sim_data$group == "beads"],
     beads_disp$common.dispersion, beads_disp$tagwise.disp,
-    beads_disp$trended.disp)
-
+    beads_disp$trended.disp
+)
 }
