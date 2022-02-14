@@ -16,7 +16,7 @@ brew(
   assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob", c = "sampleInfo", pi =
     "sampleInfo"),
   beadsRR = FALSE,
-  bp.param = bpparam()
+  BPPARAM = bpparam()
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ stored in the PhIPData object}
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 }
 \value{
@@ -121,10 +121,10 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 brew(sim_data)
 
 ## Serial
-brew(sim_data, bp.param = BiocParallel::SerialParam())
+brew(sim_data, BPPARAM = BiocParallel::SerialParam())
 
 ## Snow
-brew(sim_data, bp.param = BiocParallel::SnowParam())
+brew(sim_data, BPPARAM = BiocParallel::SnowParam())
 }
 \seealso{
 \code{[BiocParallel::BiocParallelParam]} for subclasses,

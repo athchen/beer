@@ -1,3 +1,9 @@
+Changes in version 0.99.7 (2022-02-14)
+=====================================
+
+* Changed `bp.param` argument to be called `BPPARAM` to be consistent with 
+BiocParallel arguments. 
+
 Changes in version 0.99.6 (2022-02-09)
 =====================================
 

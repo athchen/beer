@@ -12,7 +12,7 @@ summarizeRun(
   post.thin = 1,
   assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob", c = "sampleInfo", pi =
     "sampleInfo"),
-  bp.param = BiocParallel::bpparam()
+  BPPARAM = BiocParallel::bpparam()
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ super-enriched peptides}
 
 \item{assay.names}{named vector of specifying where to store point estimates}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 }
 \value{

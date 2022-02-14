@@ -9,7 +9,7 @@
   threshold.cpm = 0,
   threshold.prevalence = 0,
   assay.names = c(logfc = "logfc", prob = "prob"),
-  bp.param = BiocParallel::bpparam()
+  BPPARAM = BiocParallel::bpparam()
 )
 }
 \arguments{
@@ -24,7 +24,7 @@
 log2(fold-change) and exact test p-values. If the vector is not names,
 the first and second entries are used as defaults}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 }
 \value{

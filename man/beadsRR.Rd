@@ -4,7 +4,7 @@
 \alias{beadsRR}
 \title{Beads-only round robin}
 \usage{
-beadsRR(object, method, bp.param = BiocParallel::bpparam(), ...)
+beadsRR(object, method, BPPARAM = BiocParallel::bpparam(), ...)
 }
 \arguments{
 \item{object}{PhIPData object}
@@ -12,7 +12,7 @@ beadsRR(object, method, bp.param = BiocParallel::bpparam(), ...)
 \item{method}{one of \code{'beer'} or \code{'edgeR'} specifying which method
 to use.}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 
 \item{...}{parameters passed to the method specific functions. See the

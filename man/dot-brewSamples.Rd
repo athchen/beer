@@ -14,7 +14,7 @@
   beads.args,
   jags.params,
   tmp.dir,
-  bp.param
+  BPPARAM
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ prior parameters (a_0, b_0)}
 
 \item{tmp.dir}{directory to store JAGS samples}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 }
 \value{

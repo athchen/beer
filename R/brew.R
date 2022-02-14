@@ -279,7 +279,7 @@ brewOne <- function(object, sample, prior.params,
 #' prior parameters (a_0, b_0)
 #' @param jags.params list of JAGS parameters
 #' @param tmp.dir directory to store JAGS samples
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
 #' @return vector of process id's for internal checking of whether functions
@@ -289,7 +289,7 @@ brewOne <- function(object, sample, prior.params,
 #' @importMethodsFrom BiocParallel bplapply
 .brewSamples <- function(object, sample.id, beads.id, se.matrix,
     prior.params, beads.prior, beads.args, jags.params,
-    tmp.dir, bp.param) {
+    tmp.dir, BPPARAM) {
     progressr::handlers("txtprogressbar")
     p <- progressr::progressor(along = sample.id)
 
@@ -340,7 +340,7 @@ brewOne <- function(object, sample, prior.params,
         saveRDS(jags_run, file.path(tmp.dir, paste0(sample, ".rds")))
 
         Sys.getpid()
-    }, BPPARAM = bp.param)
+    }, BPPARAM = BPPARAM)
 
     jags_out
 }
@@ -424,7 +424,7 @@ brewOne <- function(object, sample, prior.params,
 #' stored in the PhIPData object
 #' @param beadsRR logical value specifying whether each beads-only sample
 #' should be compared to all other beads-only samples.
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
 #' @return A PhIPData object with BEER results stored in the locations specified
@@ -445,10 +445,10 @@ brewOne <- function(object, sample, prior.params,
 #' brew(sim_data)
 #'
 #' ## Serial
-#' brew(sim_data, bp.param = BiocParallel::SerialParam())
+#' brew(sim_data, BPPARAM = BiocParallel::SerialParam())
 #'
 #' ## Snow
-#' brew(sim_data, bp.param = BiocParallel::SnowParam())
+#' brew(sim_data, BPPARAM = BiocParallel::SnowParam())
 #' @importFrom BiocParallel bplapply
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData
@@ -479,7 +479,7 @@ brew <- function(object,
         c = "sampleInfo", pi = "sampleInfo"
     ),
     beadsRR = FALSE,
-    bp.param = bpparam()) {
+    BPPARAM = bpparam()) {
     .checkCounts(object)
 
     ## Check and tidy inputs
@@ -565,7 +565,7 @@ brew <- function(object,
         progressr::with_progress({
             beads_pid <- beadsRR(subsetBeads(object),
                 method = "beer",
-                bp.param = bp.param,
+                BPPARAM = BPPARAM,
                 prior.params, beads.args, jags.params,
                 tmp.dir, assay.names, FALSE
             )
@@ -577,7 +577,7 @@ brew <- function(object,
         pids <- .brewSamples(
             object, sample_id, beads_id, se.matrix,
             prior.params, beads.prior, beads.args,
-            jags.params, tmp.dir, bp.param
+            jags.params, tmp.dir, BPPARAM
         )
     })
 
@@ -588,7 +588,7 @@ brew <- function(object,
         burn.in = jags.params$burn.in,
         post.thin = jags.params$post.thin,
         assay.names,
-        bp.param
+        BPPARAM
     )
 
     ## Clean-up if necessary

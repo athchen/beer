@@ -31,10 +31,10 @@ test_that("warns when overwriting matrices", {
 test_that("edgeR runs with different BiocParallelParam classes", {
 
     ## Serial
-    edgeR_ser <- runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+    edgeR_ser <- runEdgeR(sim_data, BPPARAM = BiocParallel::SerialParam())
     ## Snow
     suppressWarnings(
-        edgeR_snow <- runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+        edgeR_snow <- runEdgeR(sim_data, BPPARAM = BiocParallel::SnowParam())
     )
 
     ## Check that there's nothing different

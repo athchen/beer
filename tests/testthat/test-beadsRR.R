@@ -14,12 +14,12 @@ test_that("beadsRR works with BEER", {
     beer_ser <- beadsRR(sim_data,
         method = "beer",
         jags.params = list(seed = 123),
-        bp.param = BiocParallel::SerialParam()
+        BPPARAM = BiocParallel::SerialParam()
     )
     suppressWarnings(beer_snow <- beadsRR(sim_data,
         method = "beer",
         jags.params = list(seed = 123),
-        bp.param = BiocParallel::SnowParam()
+        BPPARAM = BiocParallel::SnowParam()
     ))
     expect_identical(beer_ser, beer_snow)
 })
@@ -30,11 +30,11 @@ test_that("beadsRR works with edgeR", {
     ## Test parallelization
     beadsRR_ser <- beadsRR(sim_data,
         method = "edgeR",
-        bp.param = BiocParallel::SerialParam()
+        BPPARAM = BiocParallel::SerialParam()
     )
     beadsRR_snow <- beadsRR(sim_data,
         method = "edgeR",
-        bp.param = BiocParallel::SnowParam()
+        BPPARAM = BiocParallel::SnowParam()
     )
     expect_identical(beadsRR_ser, beadsRR_snow)
 })

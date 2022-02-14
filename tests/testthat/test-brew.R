@@ -161,7 +161,7 @@ test_that("brew can run with different BiocParallelParam classes", {
     brew_seq <- brew(sim_data,
         sample.dir = ex_dir,
         jags.params = list(seed = 123),
-        bp.param = BiocParallel::SerialParam()
+        BPPARAM = BiocParallel::SerialParam()
     )
     expect_equal(list.files(ex_dir), paste0(c(10, 5:9), ".rds"))
     # Clean directory
@@ -170,7 +170,7 @@ test_that("brew can run with different BiocParallelParam classes", {
     ## Snow
     suppressWarnings(brew_snow <- brew(sim_data,
         jags.params = list(seed = 123),
-        bp.param = BiocParallel::SnowParam()
+        BPPARAM = BiocParallel::SnowParam()
     ))
 
     ## Check that there's nothing different

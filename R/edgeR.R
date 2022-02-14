@@ -95,7 +95,7 @@ edgeROne <- function(object, sample, beads,
 #' first and second entries are used as defaults
 #' @param beadsRR logical value specifying whether each beads-only sample
 #' should be compared to all other beads-only samples.
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
 #' @return PhIPData object with log2 estimated fold-changes and p-values for
@@ -110,10 +110,10 @@ edgeROne <- function(object, sample, beads,
 #' runEdgeR(sim_data)
 #'
 #' ## Serial
-#' runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+#' runEdgeR(sim_data, BPPARAM = BiocParallel::SerialParam())
 #'
 #' ## Snow
-#' runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+#' runEdgeR(sim_data, BPPARAM = BiocParallel::SnowParam())
 #' @importFrom BiocParallel bplapply bpparam
 #' @importFrom cli cli_alert_warning
 #' @import PhIPData SummarizedExperiment
@@ -121,7 +121,7 @@ edgeROne <- function(object, sample, beads,
 runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob"),
     beadsRR = FALSE,
-    bp.param = BiocParallel::bpparam()) {
+    BPPARAM = BiocParallel::bpparam()) {
 
     # Add names to assay.names vector
     if (is.null(names(assay.names))) {
@@ -164,7 +164,7 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     ## Do beadsRR if necessary
     if (beadsRR) {
         object <- beadsRR(object,
-            bp.param = bp.param,
+            BPPARAM = BPPARAM,
             method = "edgeR",
             threshold.cpm, threshold.prevalence, assay.names
         )
@@ -197,7 +197,7 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
             object, sample, beads_names,
             common_disp, tagwise_disp, trended_disp
         )
-    }, BPPARAM = bp.param)
+    }, BPPARAM = BPPARAM)
 
     # Unnest output items
     for (result in output) {

@@ -84,7 +84,7 @@ summarizeRunOne <- function(object, file, se.matrix,
 #' @param burn.in number of iterations to be burned
 #' @param post.thin thinning parameter
 #' @param assay.names named vector of specifying where to store point estimates
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
 #' @return PhIPData object with point estimates stored in the assays specified
@@ -99,7 +99,7 @@ summarizeRun <- function(object, jags.files, se.matrix,
         phi = NULL, phi_Z = "logfc", Z = "prob",
         c = "sampleInfo", pi = "sampleInfo"
     ),
-    bp.param = BiocParallel::bpparam()) {
+    BPPARAM = BiocParallel::bpparam()) {
 
     ## Check that all files are present
     if (!all(file.exists(jags.files))) {
@@ -171,7 +171,7 @@ summarizeRun <- function(object, jags.files, se.matrix,
         )
         p(file_counter, class = "sticky", amount = 1)
         summarizeRunOne(object, file, se.matrix, burn.in, post.thin)
-    }, BPPARAM = bp.param)
+    }, BPPARAM = BPPARAM)
 
     for (out in files_out) {
         sample <- out$point_c$sample

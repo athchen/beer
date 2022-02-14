@@ -14,7 +14,7 @@
 #' @param assay.names named vector indicating where MCMC results should be
 #' stored in the PhIPData object
 #' @param summarize logical indicating whether to return a PhIPData object.
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
 #' @return vector of process IDs or a PhIPData object
@@ -46,7 +46,7 @@
         c = "sampleInfo", pi = "sampleInfo"
     ),
     summarize = TRUE,
-    bp.param = bpparam()) {
+    BPPARAM = bpparam()) {
     .checkCounts(object)
 
     ## Check and tidy inputs
@@ -128,7 +128,7 @@
         saveRDS(jags_run, file.path(tmp.dir, paste0(sample, ".rds")))
 
         Sys.getpid()
-    }, BPPARAM = bp.param)
+    }, BPPARAM = BPPARAM)
 
     if (summarize) {
         out <- summarizeRun(object, file.path(tmp.dir, paste0(beads_id, ".rds")),
@@ -138,7 +138,7 @@
             burn.in = jags.params$burn.in,
             post.thin = jags.params$post.thin,
             assay.names,
-            bp.param
+            BPPARAM
         )
 
         ## Clean-up after summarization
@@ -164,7 +164,7 @@
 #' @param assay.names named vector specifying the assay names for the
 #' log2(fold-change) and exact test p-values. If the vector is not names,
 #' the first and second entries are used as defaults
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
 #' @return vector of process IDs
@@ -173,7 +173,7 @@
 #' @importFrom BiocParallel bplapply
 .beadsRREdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob"),
-    bp.param = BiocParallel::bpparam()) {
+    BPPARAM = BiocParallel::bpparam()) {
 
     ## Set-up output matrices ----------
     ## Make empty matrix for the cases where fc and prob do not exist
@@ -251,7 +251,7 @@
 #' @param object PhIPData object
 #' @param method one of \code{'beer'} or \code{'edgeR'} specifying which method
 #' to use.
-#' @param bp.param \code{[BiocParallel::BiocParallelParam]} passed to
+#' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #' @param ... parameters passed to the method specific functions. See the
 #' \emph{Details} section below for additional information.
@@ -268,12 +268,12 @@
 #' beadsRR(sim_data, method = "beer")
 #' beadsRR(sim_data, method = "edgeR")
 #' @export
-beadsRR <- function(object, method, bp.param = BiocParallel::bpparam(), ...) {
+beadsRR <- function(object, method, BPPARAM = BiocParallel::bpparam(), ...) {
     if (!method %in% c("edgeR", "beer")) {
         stop("Invalid specified method for beads-only round robin.")
     } else if (method == "edgeR") {
-        .beadsRREdgeR(object, bp.param = bp.param, ...)
+        .beadsRREdgeR(object, BPPARAM = BPPARAM, ...)
     } else {
-        .beadsRRBeer(object, bp.param = bp.param, ...)
+        .beadsRRBeer(object, BPPARAM = BPPARAM, ...)
     }
 }

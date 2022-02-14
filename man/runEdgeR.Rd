@@ -10,7 +10,7 @@ runEdgeR(
   threshold.prevalence = 0,
   assay.names = c(logfc = "logfc", prob = "prob"),
   beadsRR = FALSE,
-  bp.param = BiocParallel::bpparam()
+  BPPARAM = BiocParallel::bpparam()
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ first and second entries are used as defaults}
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 }
 \value{
@@ -45,10 +45,10 @@ sim_data <- readRDS(system.file("extdata", "sim_data.rds", package = "beer"))
 runEdgeR(sim_data)
 
 ## Serial
-runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
+runEdgeR(sim_data, BPPARAM = BiocParallel::SerialParam())
 
 ## Snow
-runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+runEdgeR(sim_data, BPPARAM = BiocParallel::SnowParam())
 }
 \seealso{
 \code{[BiocParallel::BiocParallelParam]}, \code{\link{beadsRR}}

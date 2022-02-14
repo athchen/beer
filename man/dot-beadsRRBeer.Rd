@@ -15,7 +15,7 @@
   assay.names = c(phi = NULL, phi_Z = "logfc", Z = "prob", c = "sampleInfo", pi =
     "sampleInfo"),
   summarize = TRUE,
-  bp.param = bpparam()
+  BPPARAM = bpparam()
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ stored in the PhIPData object}
 
 \item{summarize}{logical indicating whether to return a PhIPData object.}
 
-\item{bp.param}{\code{[BiocParallel::BiocParallelParam]} passed to
+\item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
 }
 \value{
