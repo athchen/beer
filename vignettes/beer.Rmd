@@ -310,16 +310,16 @@ colSums(beer_hits)
 
 # Parallelization
 
-By default, `beer` runs using the first registered back-end for parallelization as returned by `BiocParallel::bpparam()`. Other parallel evaluation environments are supported via the [`BiocParallel`](https://bioconductor.org/packages/release/bioc/html/BiocParallel.html) package (see the [BiocParallel vignette](https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Introduction_To_BiocParallel.pdf) for a list of possible parallelization environments). In both `brew()` and `runEdgeR`, the parallel environments are passed via the `bp.params` argument which takes a `BiocParallelParam` object. 
+By default, `beer` runs using the first registered back-end for parallelization as returned by `BiocParallel::bpparam()`. Other parallel evaluation environments are supported via the [`BiocParallel`](https://bioconductor.org/packages/release/bioc/html/BiocParallel.html) package (see the [BiocParallel vignette](https://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Introduction_To_BiocParallel.pdf) for a list of possible parallelization environments). In both `brew()` and `runEdgeR`, the parallel environments are passed via the `BPPARAM` argument which takes a `BiocParallelParam` object. 
 
 ```{r, warning=FALSE}
 ## Run edgeR using different parallel environments
-runEdgeR(sim_data, bp.param = BiocParallel::SerialParam())
-runEdgeR(sim_data, bp.param = BiocParallel::SnowParam())
+runEdgeR(sim_data, BPPARAM = BiocParallel::SerialParam())
+runEdgeR(sim_data, BPPARAM = BiocParallel::SnowParam())
 
 ## Run beer in parallel
-brew(sim_data, bp.param = BiocParallel::SerialParam())
-brew(sim_data, bp.param = BiocParallel::SnowParam())
+brew(sim_data, BPPARAM = BiocParallel::SerialParam())
+brew(sim_data, BPPARAM = BiocParallel::SnowParam())
 ```
 
 # `sessionInfo()`
