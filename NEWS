@@ -6,8 +6,7 @@ Changes in version 0.99.8 (2022-02-14)
 Changes in version 0.99.7 (2022-02-14)
 =====================================
 
-* Changed `bp.param` argument to be called `BPPARAM` to be consistent with
-BiocParallel arguments.
+* Changed `bp.param` argument to be called `BPPARAM` to be consistent with BiocParallel arguments.
 
 Changes in version 0.99.6 (2022-02-09)
 =====================================
@@ -18,29 +17,26 @@ Changes in version 0.99.6 (2022-02-09)
 Changes in version 0.99.3 (2022-01-31)
 =====================================
 
-Documentation
++ Documentation
 
-* Corrected typos, formatting errors, and missing links.
-* Modified `DESCRIPTION` to include `URL` and remove `Collates`
-* Removed directions for installing `PhIPData` in the `README` and Vignette.
-* Added package citations for `edgeR`.
-* Added package man page.
-* Additional details have been added to the documentation for
-`phipseq_model.bugs`.
-* Added citation.
+  * Corrected typos, formatting errors, and missing links.
+  * Modified `DESCRIPTION` to include `URL` and remove `Collates`
+  * Removed directions for installing `PhIPData` in the `README` and Vignette.
+  * Added package citations for `edgeR`.
+  * Added package man page.
+  * Additional details have been added to the documentation for `phipseq_model.bugs`.
+  * Added citation.
 
-Code
++ Code
 
-* Standardized function names to use `camelCase`.
-* Standardized function arguments to use `dot.case`.
-* Though `edgeROne()` and `brewOne()` are not meant to be directly interfaced
-by the user, the two function names have been changed to reflect that they are
-still exported.
-* Renamed `edgeR()` to `runEdgeR()` to be more descriptive.
-* Corrected `paste0()` that should have been `file.path()`.
-* Converted to `BiocParallel` from `future` for parallelization support.
+  * Standardized function names to use `camelCase`.
+  * Standardized function arguments to use `dot.case`.
+  * Though `edgeROne()` and `brewOne()` are not meant to be directly interfaced by the user, the two function names have been changed to reflect that they are still exported.
+  * Renamed `edgeR()` to `runEdgeR()` to be more descriptive.
+  * Corrected `paste0()` that should have been `file.path()`.
+  * Converted to `BiocParallel` from `future` for parallelization support.
 
 Changes in version 0.99.0 (2022-01-13)
 =====================================
 
-Submitted to Bioconductor
+* Submitted to Bioconductor
