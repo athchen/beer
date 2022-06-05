@@ -25,6 +25,7 @@ test_that("beadsRR works with BEER", {
 })
 
 test_that("beadsRR works with edgeR", {
+    ## Test exactTest
     expect_s4_class(beadsRR(sim_data, method = "edgeR"), "PhIPData")
 
     ## Test parallelization
@@ -34,6 +35,22 @@ test_that("beadsRR works with edgeR", {
     )
     beadsRR_snow <- beadsRR(sim_data,
         method = "edgeR",
+        BPPARAM = BiocParallel::SnowParam()
+    )
+    expect_identical(beadsRR_ser, beadsRR_snow)
+
+    ## Test glmQLF
+    expect_s4_class(
+        beadsRR(sim_data, method = "edgeR", de.method = "glmQLFTest"),
+        "PhIPData")
+
+    ## Test parallelization
+    beadsRR_ser <- beadsRR(sim_data,
+        method = "edgeR", de.method = "glmQLFTest",
+        BPPARAM = BiocParallel::SerialParam()
+    )
+    beadsRR_snow <- beadsRR(sim_data,
+        method = "edgeR", de.method = "glmQLFTest",
         BPPARAM = BiocParallel::SnowParam()
     )
     expect_identical(beadsRR_ser, beadsRR_snow)

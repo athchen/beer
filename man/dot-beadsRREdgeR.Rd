@@ -9,6 +9,7 @@
   threshold.cpm = 0,
   threshold.prevalence = 0,
   assay.names = c(logfc = "logfc", prob = "prob"),
+  de.method = "exactTest",
   BPPARAM = BiocParallel::bpparam()
 )
 }
@@ -22,7 +23,10 @@
 
 \item{assay.names}{named vector specifying the assay names for the
 log2(fold-change) and exact test p-values. If the vector is not names,
-the first and second entries are used as defaults}
+the first and second entries are used as defaults.}
+
+\item{de.method}{character describing which edgeR test for differential
+expression should be used. Must be one of `exactTest` or `glmQLFTest`.}
 
 \item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}

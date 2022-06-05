@@ -163,7 +163,9 @@
 #' \code{threshold.cpm}.
 #' @param assay.names named vector specifying the assay names for the
 #' log2(fold-change) and exact test p-values. If the vector is not names,
-#' the first and second entries are used as defaults
+#' the first and second entries are used as defaults.
+#' @param de.method character describing which edgeR test for differential
+#' expression should be used. Must be one of `exactTest` or `glmQLFTest`.
 #' @param BPPARAM \code{[BiocParallel::BiocParallelParam]} passed to
 #' BiocParallel functions.
 #'
@@ -173,6 +175,7 @@
 #' @importFrom BiocParallel bplapply
 .beadsRREdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
     assay.names = c(logfc = "logfc", prob = "prob"),
+    de.method = "exactTest",
     BPPARAM = BiocParallel::bpparam()) {
 
     ## Set-up output matrices ----------
@@ -195,23 +198,35 @@
 
     beads_names <- colnames(subsetBeads(object))
 
-    output <- bplapply(beads_names, function(sample) {
+    output <- BiocParallel::bplapply(beads_names, function(sample) {
         ## Recode existing object
         one_beads <- object
         one_beads$group[colnames(one_beads) == sample] <- "sample"
 
         ## Derive dispersion estimates from beads-only samples
-        edgeR_beads <- .edgeRBeads(object, threshold.cpm, threshold.prevalence)
+        edgeR_beads <- if(de.method == "exactTest") {
+            .edgeRBeads(object, threshold.cpm, threshold.prevalence)
+        } else {
+            .edgeRBeadsQLF(object, threshold.cpm, threshold.prevalence)
+        }
         common_disp <- edgeR_beads$common.dispersion
         tagwise_disp <- edgeR_beads$tagwise.dispersion
         trended_disp <- edgeR_beads$trended.dispersion
 
         ## Run edgeR for the one beads-only sample ------------
-        edgeROne(
-            one_beads, sample, beads_names[beads_names != sample],
-            common_disp, tagwise_disp, trended_disp
-        )
-    })
+        if (de.method == "exactTest") {
+            edgeROne(
+                one_beads, sample, beads_names[beads_names != sample],
+                common_disp, tagwise_disp, trended_disp
+            )
+        } else {
+            edgeROneQLF(
+                one_beads, sample, beads_names[beads_names != sample],
+                common_disp, tagwise_disp, trended_disp
+            )
+        }
+
+    }, BPPARAM = BPPARAM)
 
     ## Unnest output
     for (result in output) {
@@ -267,6 +282,7 @@
 #'
 #' beadsRR(sim_data, method = "beer")
 #' beadsRR(sim_data, method = "edgeR")
+#' beadsRR(sim_data, method = "edgeR", de.method = "glmQLFTest")
 #' @export
 beadsRR <- function(object, method, BPPARAM = BiocParallel::bpparam(), ...) {
     if (!method %in% c("edgeR", "beer")) {

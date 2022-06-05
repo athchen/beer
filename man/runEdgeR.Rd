@@ -10,6 +10,7 @@ runEdgeR(
   threshold.prevalence = 0,
   assay.names = c(logfc = "logfc", prob = "prob"),
   beadsRR = FALSE,
+  de.method = "exactTest",
   BPPARAM = BiocParallel::bpparam()
 )
 }
@@ -27,6 +28,9 @@ first and second entries are used as defaults}
 
 \item{beadsRR}{logical value specifying whether each beads-only sample
 should be compared to all other beads-only samples.}
+
+\item{de.method}{character describing which edgeR test for differential
+expression should be used. Must be one of `exactTest` or `glmQLFTest`}
 
 \item{BPPARAM}{\code{[BiocParallel::BiocParallelParam]} passed to
 BiocParallel functions.}
@@ -49,6 +53,10 @@ runEdgeR(sim_data, BPPARAM = BiocParallel::SerialParam())
 
 ## Snow
 runEdgeR(sim_data, BPPARAM = BiocParallel::SnowParam())
+
+## With glmQLFTest
+runEdgeR(sim_data, de.method = "glmQLFTest")
+
 }
 \seealso{
 \code{[BiocParallel::BiocParallelParam]}, \code{\link{beadsRR}}
