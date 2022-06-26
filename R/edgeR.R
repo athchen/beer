@@ -64,7 +64,7 @@
 
     ## Estimate common, trended, and tagwise dispersion in the beads-only data
     ## Define design matrix
-    design_intercept <- model.matrix(~ 1, data = sampleInfo(phip_beads))
+    design_intercept <- model.matrix(~1, data = sampleInfo(phip_beads))
 
     # Estimate dispersions
     edgeR::estimateDisp(edgeR_beads, design_intercept)
@@ -179,7 +179,6 @@ edgeROneQLF <- function(object, sample, beads,
         logfc = output$table$logFC,
         log10pval = log10pval
     )
-
 }
 
 #' Run edgeR on PhIP-Seq data
@@ -241,7 +240,7 @@ runEdgeR <- function(object, threshold.cpm = 0, threshold.prevalence = 0,
         stop("Invalid edgeR method for identifying DE peptides.")
     }
 
-    edgeR_beads <- if(de.method == "exactTest") {
+    edgeR_beads <- if (de.method == "exactTest") {
         .edgeRBeads(object, threshold.cpm, threshold.prevalence)
     } else {
         .edgeRBeadsQLF(object, threshold.cpm, threshold.prevalence)

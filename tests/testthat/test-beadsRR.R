@@ -42,7 +42,8 @@ test_that("beadsRR works with edgeR", {
     ## Test glmQLF
     expect_s4_class(
         beadsRR(sim_data, method = "edgeR", de.method = "glmQLFTest"),
-        "PhIPData")
+        "PhIPData"
+    )
 
     ## Test parallelization
     beadsRR_ser <- beadsRR(sim_data,

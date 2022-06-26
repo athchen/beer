@@ -61,7 +61,7 @@
         if (object$group[col] != getBeadsName()) {
             ne_peps <- !guess_e[, col]
             coef(lm(counts(object)[ne_peps, col] ~
-            expected_rc[ne_peps, col] - 1))
+                expected_rc[ne_peps, col] - 1))
         } else {
             1
         }

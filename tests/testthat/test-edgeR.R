@@ -42,7 +42,6 @@ test_that("edgeR runs with different BiocParallelParam classes", {
 })
 
 test_that("edgeR works with beadsRR", {
-
     exact <- runEdgeR(sim_data, beadsRR = TRUE)
     glmQLF <- runEdgeR(sim_data, beadsRR = TRUE, de.method = "glmQLFTest")
 
@@ -55,6 +54,8 @@ test_that("edgeR works with beadsRR", {
 test_that("runEdgeR captures invalid inputs", {
 
     # Error for invalid method
-    expect_error(runEdgeR(sim_data, de.method = "invalid"),
-        "Invalid edgeR method for identifying DE peptides.")
+    expect_error(
+        runEdgeR(sim_data, de.method = "invalid"),
+        "Invalid edgeR method for identifying DE peptides."
+    )
 })

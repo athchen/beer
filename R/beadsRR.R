@@ -204,7 +204,7 @@
         one_beads$group[colnames(one_beads) == sample] <- "sample"
 
         ## Derive dispersion estimates from beads-only samples
-        edgeR_beads <- if(de.method == "exactTest") {
+        edgeR_beads <- if (de.method == "exactTest") {
             .edgeRBeads(object, threshold.cpm, threshold.prevalence)
         } else {
             .edgeRBeadsQLF(object, threshold.cpm, threshold.prevalence)
@@ -225,7 +225,6 @@
                 common_disp, tagwise_disp, trended_disp
             )
         }
-
     }, BPPARAM = BPPARAM)
 
     ## Unnest output
