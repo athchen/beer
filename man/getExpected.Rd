@@ -4,15 +4,19 @@
 \alias{getExpected}
 \title{Calculate expected read counts or proportion of reads}
 \usage{
-getExpected(object, type = "rc", assay.name = "expected_rc")
+getExpected(
+  object,
+  type = c("rc", "prop"),
+  assay.names = c("expected_rc", "expected_prop")
+)
 }
 \arguments{
 \item{object}{PhIPData object}
 
-\item{type}{one of `rc` or `prop` indicating whether the function should 
+\item{type}{any of `rc` or `prop` indicating whether the function should
 return the expected read counts or expected proportion of reads, respectively}
 
-\item{assay.name}{name indicating where the results should be stored in the 
+\item{assay.names}{name(s) indicating where the results should be stored in the
 PhIPData object}
 }
 \value{
@@ -30,5 +34,8 @@ getExpected(sim_data, "rc", "expected_rc")
 
 ## Calculate expected proportion of reads
 getExpected(sim_data, "prop", "expected_prop")
+
+## Calculate both
+getExpected(sim_data)
 
 }

@@ -84,35 +84,6 @@ sim_data <- readRDS(data_path)
 sim_data
 ```
 
-We can visualize the simulated data by plotting the observed versus the expected number of reads. 
-
-```{r, echo = FALSE, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Observed versus expected read counts for simulated data. Each point represents a peptide in a given sample. Point in red indicate truly enriched peptides."}
-as(sim_data, "DataFrame") %>%
-  as_tibble() %>%
-  group_by(peptide) %>%
-  mutate(sample = factor(sample, 1:10), 
-         expected_prop = mean((counts/n)[group == "beads"]), 
-         expected_reads = expected_prop*n, 
-         sample_name = paste0(group, " ", sample)) %>%
-  arrange(true_Z) %>%
-  ggplot(aes(x = expected_reads, y = counts, color = factor(true_Z))) + 
-  geom_abline(aes(intercept = 0, slope = 1), size = 1) + 
-  geom_point() +
-  facet_wrap(sample_name ~., ncol = 4, scales = "free") +
-  labs(x = "expected read counts", 
-       y = "observed read counts", 
-       color = "true enrichment status") +
-  scale_x_log10() +
-  scale_y_log10() +
-  scale_color_manual(values = c("grey", "red"), 
-                     breaks = c(0, 1), 
-                     labels = c("not enriched", "enriched")) +
-  theme_bw() + 
-  theme(legend.position = c(0.75, 0.15), 
-        axis.text.x = element_text(angle = 45, hjust = 1), 
-        aspect.ratio = 1)
-```
-
 # edgeR
 
 Differentially enriched peptides between a particular serum sample and all beads-only samples indicate enriched antibody responses to those peptides. Thus, to identify enriched peptides, we can run the standard `r Biocpkg("edgeR")` pipeline for differential expression. 
@@ -320,6 +291,78 @@ runEdgeR(sim_data, BPPARAM = BiocParallel::SnowParam())
 ## Run beer in parallel
 brew(sim_data, BPPARAM = BiocParallel::SerialParam())
 brew(sim_data, BPPARAM = BiocParallel::SnowParam())
+```
+
+# Plot Helpers
+
+To facilitate visualization of PhIP-Seq analyses, `beer` includes plot helpers that calculate values of interest and stores these values as a new assays in the `PhIPData` object. Currently, these functions include:
+
+* `getExpected()` returns expected reads/proportions pulled by a peptide based on the average proportion of reads pulled across all beads-only samples, 
+* `getBF()`: returns Bayes factors for the probability of enriched antibody responses for each peptide. 
+
+## `getExpected()`
+
+To calculate the expected read counts and proportion of reads, we can specify `type = c("rc", "prop")` in `getExpected()`. This resulting `PhIPData` object can be converted to a `DataFrame`/`tibble` which can be plotted using any plotting method of choice. For example, we can visualize the simulated data set by plotting the observed read counts to the expected read counts as follows, 
+
+We can visualize the simulated data by plotting the observed versus the expected number of reads. 
+
+```{r, echo = FALSE, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Observed versus expected read counts for simulated data. Each point represents a peptide in a given sample. Point in red indicate truly enriched peptides."}
+
+getExpected(sim_data) %>%
+  as("DataFrame") %>%
+  as_tibble() %>%
+  group_by(peptide) %>%
+  mutate(sample = factor(sample, 1:10),
+         sample_name = paste0(group, " ", sample)) %>%
+  arrange(true_Z) %>%
+  ggplot(aes(x = expected_rc, y = counts, color = factor(true_Z))) + 
+  geom_abline(aes(intercept = 0, slope = 1), size = 1) + 
+  geom_point() +
+  facet_wrap(sample_name ~., ncol = 4, scales = "free") +
+  labs(x = "expected read counts", 
+       y = "observed read counts", 
+       color = "true enrichment status") +
+  scale_x_log10() +
+  scale_y_log10() +
+  scale_color_manual(values = c("grey", "red"), 
+                     breaks = c(0, 1), 
+                     labels = c("not enriched", "enriched")) +
+  theme_bw() + 
+  theme(legend.position = c(0.75, 0.15), 
+        axis.text.x = element_text(angle = 45, hjust = 1), 
+        aspect.ratio = 1)
+```
+
+## `getBF()`
+
+Once `brew()` has been run on a `PhIPData` object, we can plot Bayes factors for peptide enrichment using the `getBF()` plot helper. `getBF()` returns a `PhIPData` object with Bayes factors stored as an additional assay. For example, on the simulated data set, a plot of Bayes factors by peptide can be generated as follows, 
+
+```{r, echo = FALSE, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Bayes factors for simulated data."}
+
+brew(sim_data, beadsRR = TRUE) %>%
+getBF() %>%
+  as("DataFrame") %>%
+  as_tibble() %>%
+  mutate(
+    peptide = factor(peptide, 1:10), 
+    sample = factor(sample, 1:10),
+         sample_name = paste0(group, " ", sample), 
+    pred = ifelse(prob >= 0.5, TRUE, FALSE)) %>%
+  ggplot(aes(x = peptide, y = bayes_factors, color = pred)) +
+  geom_point() + 
+  facet_wrap(sample_name ~., ncol = 4) +
+  labs(x = "peptide", 
+       y = "Bayes factor", 
+       color = "prediction") +
+  scale_y_log10() +
+  scale_color_manual(
+    breaks = c(TRUE, FALSE), 
+    values = c("red", "black"), 
+    labels = c("enriched", "not enriched")
+  ) +
+  theme_bw() + 
+  theme(legend.position = c(0.75, 0.15),
+        aspect.ratio = 1)
 ```
 
 # `sessionInfo()`
