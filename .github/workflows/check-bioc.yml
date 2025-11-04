@@ -116,12 +116,15 @@ jobs:
           key: ${{ env.cache-version }}-${{ runner.os }}-biocversion-RELEASE_3_20-r-4.4-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ env.cache-version }}-${{ runner.os }}-biocversion-RELEASE_3_20-r-4.4-
 
-      # - name: Install Linux system dependencies
-      #   if: runner.os == 'Linux'
-      #   run: |
-      #     sysreqs=$(Rscript -e 'cat("apt-get update -y && apt-get install -y", paste(gsub("apt-get install -y ", "", remotes::system_requirements("ubuntu", "20.04")), collapse = " "))')
-      #     echo $sysreqs
-      #     sudo -s eval "$sysreqs"
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sysreqs=$(Rscript -e 'cat("apt-get update -y && apt-get install -y", paste(gsub("apt-get install -y ", "", remotes::system_requirements("ubuntu", "20.04")), collapse = " "))')
+          echo $sysreqs
+          sudo -s eval "$sysreqs"
+          sudo -s apt-get install jags
+          sudo -s apt-get install libv8-dev
+          sudo -s apt-get install libnode-dev
 
       - name: Install macOS system dependencies
         if: matrix.config.os == 'macOS-latest'
@@ -142,12 +145,17 @@ jobs:
 
           ## Required for tcltk
           brew install xquartz --cask
+          
+          ## For installing rjags
+          brew install jags
 
       - name: Install Windows system dependencies
         if: runner.os == 'Windows'
         run: |
-          ## Edit below if you have any Windows system dependencies
-        shell: Rscript {0}
+          curl.exe -o wjags.exe --url https://www.r-project.org/nosvn/winutf8/ucrt3/extra/jags/JAGS-4.3.0.exe
+          wjags.exe /S
+          del wjags.exe
+        shell: cmd
 
       - name: Install BiocManager
         run: |
