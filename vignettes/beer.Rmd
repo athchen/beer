@@ -207,6 +207,29 @@ By default, if **`sample.dir = NULL`** in `brew()`, the samples from each MCMC r
 
 Is is important to note that MCMC parameters are indexed by row and column. Since super enriched peptides are tossed out _before_ running the MCMC, the row index of the parameter does not necessarily correspond to the row of the PhIPData object. For example parameter `Z[5, 1]` could in reality correspond to peptide 8 in the PhIPData object if there were three peptides before peptide 8 that were labeled as super-enriched. 
 
+## Visualizing MCMC Convergence
+
+Once the MCMC samples have been saved, trace and density plots can be visualized using other packaged designed for such purposes such as  [`coda`](https://cran.r-project.org/web/packages/coda/index.html),  [`bayesplot`](http://mc-stan.org/bayesplot/), or [`tidybayes`](http://mjskay.github.io/tidybayes/). Below we demonstrate how this can be done for the simulated data using `coda`. 
+
+```{r results = FALSE, message=FALSE, warning = FALSE, error = FALSE, fig.width = 6, fig.height = 12}
+## Temporary directory to export MCMC chains
+tmpdir <- tempdir()
+
+## brew with three chains for visualization purposes
+brew(sim_data, beadsRR = TRUE, sample.dir = tmpdir, 
+  jags.params = list(n.chains = 3))
+
+## Read in MCMC samples for sample 9
+## Note that samples are exported as a mcmc.list
+mcmc_samples <- readRDS(list.files(tmpdir, "9.rds", full.names = TRUE)) 
+
+## Plots trace and density plots for the estimated fold-changes for 
+## four peptides using `coda`
+phi_index <- grep("phi", colnames(mcmc_samples[[1]]))[1:4]
+plot(mcmc_samples[, phi_index])
+```
+
+
 # Beads-only round robin
 
 To approximate the false positive rate, we often run each of the beads-only samples against all other beads-only samples. This beads-only round robin also provides a sense of how similar the beads-only samples are to each other. 
@@ -306,7 +329,7 @@ To calculate the expected read counts and proportion of reads, we can specify `t
 
 We can visualize the simulated data by plotting the observed versus the expected number of reads. 
 
-```{r, echo = FALSE, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Observed versus expected read counts for simulated data. Each point represents a peptide in a given sample. Point in red indicate truly enriched peptides."}
+```{r, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Observed versus expected read counts for simulated data. Each point represents a peptide in a given sample. Point in red indicate truly enriched peptides."}
 
 getExpected(sim_data) %>%
   as("DataFrame") %>%
@@ -337,7 +360,7 @@ getExpected(sim_data) %>%
 
 Once `brew()` has been run on a `PhIPData` object, we can plot Bayes factors for peptide enrichment using the `getBF()` plot helper. `getBF()` returns a `PhIPData` object with Bayes factors stored as an additional assay. For example, on the simulated data set, a plot of Bayes factors by peptide can be generated as follows, 
 
-```{r, echo = FALSE, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Bayes factors for simulated data."}
+```{r, warning = FALSE, fig.align='left', fig.height=5, fig.width=6, fig.cap="Bayes factors for simulated data."}
 
 brew(sim_data, beadsRR = TRUE) %>%
 getBF() %>%

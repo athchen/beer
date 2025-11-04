@@ -90,7 +90,7 @@ summarizeRunOne <- function(object, file, se.matrix,
 #' @return PhIPData object with point estimates stored in the assays specified
 #' by `assay.names`.
 #'
-#' @importFrom progressr handlers progress
+#' @importFrom progressr handlers progressor
 #' @importFrom BiocParallel bplapply
 #' @import PhIPData SummarizedExperiment
 summarizeRun <- function(object, jags.files, se.matrix,
