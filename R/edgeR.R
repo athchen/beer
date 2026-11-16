@@ -14,7 +14,7 @@
 #' @return a DGEList object with common, trended, and tagwise dispersion
 #' estimates
 #'
-#' @importFrom edgeR calcNormFactors
+#' @importFrom edgeR normLibSizes
 #' @importFrom methods as
 .edgeRBeads <- function(object, threshold.cpm = 0, threshold.prevalence = 0) {
     edgeR_beads <- as(PhIPData::subsetBeads(object), "DGEList")
@@ -26,7 +26,7 @@
 
     ## Estimate common, trended, and tagwise dispersion in the beads-only data
     edgeR_beads <- edgeR_beads[keep_ind, , keep.lib.size = FALSE]
-    edgeR_beads <- edgeR::calcNormFactors(edgeR_beads)
+    edgeR_beads <- edgeR::normLibSizes(edgeR_beads)
     edgeR_beads <- suppressMessages(edgeR::estimateDisp(edgeR_beads))
 
     edgeR_beads
@@ -49,7 +49,7 @@
 #' @return a DGEList object with common, trended, and tagwise dispersion
 #' estimates
 #'
-#' @importFrom edgeR calcNormFactors
+#' @importFrom edgeR normLibSizes
 #' @importFrom methods as
 #' @importFrom stats model.matrix
 .edgeRBeadsQLF <- function(object, threshold.cpm = 0, threshold.prevalence = 0) {
